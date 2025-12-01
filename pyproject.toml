@@ -1,0 +1,4 @@
+[tool.pyright]
+venvPath = "backend"
+venv = "venv"
+exclude = ["frontend", "**/__pycache__"]
