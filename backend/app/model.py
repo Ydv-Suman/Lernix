@@ -12,4 +12,4 @@ class Users(Base):
     last_name       = Column(String)
     phone_number    = Column(String, default=Null)
     active_status   = Column(Boolean, default=True)
-    password        = Column(String)
+    hashed_password = Column(String)
