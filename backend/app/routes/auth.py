@@ -2,15 +2,21 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+import os
+from dotenv import load_dotenv
 
 from database import SessionLocal
 from model import Users
+
+load_dotenv()
 
 router = APIRouter(
     prefix="/auth",
     tags=["auth"]
 )
 
+bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 class CreateUserRequest(BaseModel):
     email: str
@@ -29,8 +35,6 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
-# get current user
-
 
 # create new Users
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -43,7 +47,7 @@ def create_new_user(create_user_request: CreateUserRequest, db: db_dependency):
         first_name=create_user_request.first_name,
         last_name=create_user_request.last_name,
         phone_number=create_user_request.phone_number,
-        password=create_user_request.password
+        password=bcrypt_context.hash( create_user_request.password)
     )
 
     # Save user
