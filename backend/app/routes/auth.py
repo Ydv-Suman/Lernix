@@ -1,6 +1,6 @@
-from datetime import time, timedelta, timezone
+from datetime import timedelta, timezone
 import datetime
-from typing import Annotated, Optional
+from typing import Annotated, Optional, cast
 from fastapi import APIRouter, Depends, status, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -116,12 +116,18 @@ def create_access_token(username: str, user_id:int, expires_delta:timedelta):
     encode = {'sub': username, 'id':user_id}
     expires = datetime.datetime.now(timezone.utc) + expires_delta
     encode.update({'exp': expires})
-    return jwt.encode(encode, SECRETKEY, algorithm=ALGORITHM)
+    # Type narrowing: SECRETKEY and ALGORITHM are guaranteed to be str by runtime checks above
+    secret_key = cast(str, SECRETKEY)
+    algorithm = cast(str, ALGORITHM)
+    return jwt.encode(encode, secret_key, algorithm=algorithm)
 
 
 async def get_current_user(token: Annotated[str, Depends(outh2_bearer)]):
     try:
-        payload = jwt.decode(token, SECRETKEY, algorithms=[ALGORITHM])
+        # Type narrowing: SECRETKEY and ALGORITHM are guaranteed to be str by runtime checks above
+        secret_key = cast(str, SECRETKEY)
+        algorithm = cast(str, ALGORITHM)
+        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
         username: Optional[str] = payload.get('sub')
         user_id: Optional[int] = payload.get('id')
         if username is None or user_id is None:
@@ -139,3 +145,33 @@ def login_for_access_token(db: db_dependency, form_data: Annotated[OAuth2Passwor
        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='could not validate user')
     token = create_access_token(user.username, user.id, timedelta(minutes=20))  # type: ignore
     return {'access_token': token, 'token_type': 'bearer'}
+
+
+
+#
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@router.post("/login")
+def login_user(login_request: LoginRequest, db: db_dependency):
+    user = db.query(Users).filter(Users.email == login_request.email).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    if not bcrypt_context.verify(login_request.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    # Generate JWT token
+    token = create_access_token(user.username, user.id, timedelta(minutes=20))
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username
+        }
+    }
