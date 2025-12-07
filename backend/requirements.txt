@@ -4,6 +4,7 @@ sqlalchemy
 psycopg2-binary
 python-dotenv
 pymysql
-bcrypt
+bcrypt==4.0.1
 python-jose[cryptography]
 python-multipart
+passlib
