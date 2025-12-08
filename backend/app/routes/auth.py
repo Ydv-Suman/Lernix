@@ -160,11 +160,19 @@ def login_user(login_request: LoginRequest, db: db_dependency):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    if not bcrypt_context.verify(login_request.password, user.hashed_password):
+    # Ensure user.hashed_password, user.username, user.id are values, not SQLAlchemy Column objects
+    hashed_password = getattr(user, "hashed_password", None)
+    username = getattr(user, "username", None)
+    user_id = getattr(user, "id", None)
+
+    if hashed_password is None or username is None or user_id is None:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    if not bcrypt_context.verify(login_request.password, hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     # Generate JWT token
-    token = create_access_token(user.username, user.id, timedelta(minutes=20))
+    token = create_access_token(str(username), int(user_id), timedelta(minutes=20))
 
     return {
         "access_token": token,

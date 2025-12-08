@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
-const Dashboard = () => {
+const Home = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -13,12 +13,22 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-white">
       <nav className="bg-[#669694]/50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-2 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">Lernix</h1>
+            <div className="flex items-center gap-9">
+              <h1 className="text-4xl font-bold text-gray-900"><Link to="/home">Lernix</Link></h1>
+              <div className="flex items-center gap-2 text-xl font-semibold text-gray-900">
+                <div><Link to="/home">Courses</Link></div>
+                <div><Link to="/home">Notes</Link></div>
+              </div>
             </div>
+
+            
+
             <div className="flex items-center space-x-4">
+
+              
+
               <span className="text-gray-700">Welcome, {user?.username || user?.email}!</span>
               <button
                 onClick={handleLogout}
@@ -27,7 +37,7 @@ const Dashboard = () => {
                 Logout
               </button>
             </div>
-          </div>
+          </div> 
         </div>
       </nav>
 
@@ -55,4 +65,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Home;

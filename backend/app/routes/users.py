@@ -33,7 +33,7 @@ class UserResponse(BaseModel):
 
 
 @router.get('/', response_model=UserResponse, status_code=status.HTTP_200_OK)
-def get_all_users(db: db_dependency, user:user_dependency):
+def get_users(db: db_dependency, user:user_dependency):
     if user is None :
         raise HTTPException(status_code=401, detail="Authentication Failed")
     user_obj = db.query(Users).filter(Users.id == user.get('id')).first()
