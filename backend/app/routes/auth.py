@@ -62,7 +62,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 
 # create new Users
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/create", status_code=status.HTTP_201_CREATED)
 def create_new_user(create_user_request: CreateUserRequest, db: db_dependency):
     # Check if email already exists
     existing_user = db.query(Users).filter(Users.email == create_user_request.email).first()
