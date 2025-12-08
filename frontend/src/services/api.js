@@ -48,4 +48,23 @@ export const authAPI = {
   },
 };
 
+export const coursesAPI = {
+  list: async () => {
+    const response = await api.get('/courses/');
+    return response.data;
+  },
+  create: async (course) => {
+    const response = await api.post('/courses/createCourse', course);
+    return response.data;
+  },
+  update: async (courseId, course) => {
+    const response = await api.put(`/courses/updateCourse/${courseId}`, course);
+    return response.data;
+  },
+  delete: async (courseId) => {
+    const response = await api.delete(`/courses/deleteCourse/${courseId}`);
+    return response.data;
+  }
+};
+
 export default api;

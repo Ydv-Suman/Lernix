@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import Login from './components/Login';
 import Register from './components/Register';
-import Home from './components/Home';
+import Courses from './components/Courses';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -14,14 +14,14 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
-            path="/home"
+            path="/courses"
             element={
               <ProtectedRoute>
-                <Home />
+                <Courses />
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/" element={<Navigate to="/courses" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
