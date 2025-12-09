@@ -16,6 +16,7 @@ const Courses = () => {
   const [editForm, setEditForm] = useState({ title: '', description: '' });
   const createSectionRef = useRef(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
 
   useEffect(() => {
     fetchCourses();
@@ -167,20 +168,48 @@ const Courses = () => {
         <section className="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-gray-900">Your Courses</h3>
-            <button
-              onClick={fetchCourses}
-              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium cursor-pointer"
-              type="button"
-            >
-              Refresh
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                  type="button"
+                  title="List view"
+                >
+                  List
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                  type="button"
+                  title="Grid view"
+                >
+                  Grid
+                </button>
+              </div>
+              <button
+                onClick={fetchCourses}
+                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium cursor-pointer"
+                type="button"
+              >
+                Refresh
+              </button>
+            </div>
           </div>
 
           {loading ? (
             <p className="text-gray-700">Loading courses...</p>
           ) : courses.length === 0 ? (
             <p className="text-gray-600">No courses yet. Add your first one below.</p>
-          ) : (
+          ) : viewMode === 'list' ? (
             <ul className="divide-y divide-gray-200">
               {courses.map((course) => (
                 <li key={course.id} className="py-4">
@@ -276,6 +305,95 @@ const Courses = () => {
                 </li>
               ))}
             </ul>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {courses.map((course) => (
+                <div key={course.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow relative">
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="text-lg font-semibold text-gray-900 pr-8">{course.title}</h4>
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => handleMenuToggle(course.id)}
+                          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-600 cursor-pointer"
+                        >
+                          ⋮
+                        </button>
+
+                        {menuOpenId === course.id && (
+                          <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                            <button
+                              type="button"
+                              onClick={() => startEdit(course)}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(course.id)}
+                              disabled={deleting === course.id}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-red-50 text-red-600 cursor-pointer disabled:opacity-50"
+                            >
+                              {deleting === course.id ? 'Deleting...' : 'Delete'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-gray-700 text-sm mb-3">{course.description}</p>
+                    <span className="text-xs text-gray-500">ID: {course.id}</span>
+
+                    {editCourseId === course.id && (
+                      <form onSubmit={submitEdit} className="mt-3 space-y-3 pt-3 border-t border-gray-200">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                          <input
+                            type="text"
+                            name="title"
+                            value={editForm.title}
+                            onChange={handleEditChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                          <textarea
+                            name="description"
+                            value={editForm.description}
+                            onChange={handleEditChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            rows="3"
+                            required
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="submit"
+                            disabled={updating}
+                            className="px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm"
+                          >
+                            {updating ? 'Saving...' : 'Save'}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setEditCourseId(null)}
+                            className="px-3 py-1.5 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 text-sm"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
 
 

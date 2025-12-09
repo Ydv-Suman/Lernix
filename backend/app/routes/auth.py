@@ -180,6 +180,8 @@ def login_user(login_request: LoginRequest, db: db_dependency):
         "user": {
             "id": user.id,
             "email": user.email,
-            "username": user.username
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name
         }
     }

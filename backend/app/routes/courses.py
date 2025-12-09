@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, List
 from fastapi import APIRouter, HTTPException, status, Path
 from pydantic import BaseModel
 from pathlib import Path
@@ -18,7 +18,17 @@ class CreateCourseRequest(BaseModel):
     description: str
 
 
-@router.get('/', status_code=status.HTTP_200_OK)
+class CourseResponse(BaseModel):
+    id: int
+    title: str
+    description: str | None
+    owner_id: int | None
+
+    class Config:
+        from_attributes = True
+
+
+@router.get('/', status_code=status.HTTP_200_OK, response_model=List[CourseResponse])
 def view_course(db:db_dependency, user:user_dependency):
     if user is None:
         raise HTTPException(status_code=401, detail="Authentication Failed")

@@ -22,3 +22,12 @@ class Courses(Base):
     title           = Column(String(255), unique=True, nullable=False)
     description     = Column(String(1000), nullable=True)
     owner_id        = Column(Integer, ForeignKey("users.id"))
+
+
+class Chapters(Base):
+    __tablename__ = "chapters"
+
+    id                  = Column(Integer, primary_key=True, index=True)
+    chapter_title       = Column(String(255), unique=True)
+    chapter_description =  Column(String(1000), nullable=True)
+    chapter_id          = Column(Integer, ForeignKey('users.id'))
