@@ -1,7 +1,6 @@
-from typing import Annotated, List
+from typing import Annotated
 from fastapi import APIRouter, HTTPException, status, Path
 from pydantic import BaseModel
-from pathlib import Path
 
 from model import Courses, Users
 from .auth import db_dependency
@@ -17,18 +16,7 @@ class CreateCourseRequest(BaseModel):
     title: str
     description: str
 
-
-class CourseResponse(BaseModel):
-    id: int
-    title: str
-    description: str | None
-    owner_id: int | None
-
-    class Config:
-        from_attributes = True
-
-
-@router.get('/', status_code=status.HTTP_200_OK, response_model=List[CourseResponse])
+@router.get('/', status_code=status.HTTP_200_OK)
 def view_course(db:db_dependency, user:user_dependency):
     if user is None:
         raise HTTPException(status_code=401, detail="Authentication Failed")
@@ -38,7 +26,7 @@ def view_course(db:db_dependency, user:user_dependency):
 @router.post('/createCourse', status_code=status.HTTP_201_CREATED)
 def create_course(user:user_dependency, db:db_dependency, add_course:CreateCourseRequest):
     if user is None:
-        raise HTTPException(status_code=401, detail="Unthentication Failed")
+        raise HTTPException(status_code=401, detail="Authentication Failed")
     
     # Check if course title already exists
     existing_course = db.query(Courses).filter(Courses.title == add_course.title).first()
@@ -76,7 +64,6 @@ def update_course(db:db_dependency, user:user_dependency, course_update:CreateCo
     try:
         course.title = course_update.title
         course.description = course_update.description
-        db.add(course)
         db.commit()
         db.refresh(course)
         return {"message": "Course updated successfully", "course_id": course.id, "title": course.title}
@@ -88,7 +75,7 @@ def update_course(db:db_dependency, user:user_dependency, course_update:CreateCo
 @router.delete('/deleteCourse/{course_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_course(db:db_dependency, user:user_dependency, course_id: Annotated[int, Path(gt=0)]):
     if user is None:
-        return HTTPException(status_code=401, detail="Authentifation Failed")
+        raise HTTPException(status_code=401, detail="Authentication Failed")
     course = db.query(Courses).filter(Courses.id == course_id).filter(Courses.owner_id==user.get('id')).first()
     if course is None:
         raise HTTPException(status_code=404, detail="Course Not Found")
