@@ -3,7 +3,6 @@ import { AuthProvider } from './context/AuthContext';
 import Login from './components/Login';
 import Register from './components/Register';
 import Courses from './components/Courses';
-import Chapters from './components/chapters';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -23,10 +22,10 @@ function App() {
             }
           />
           <Route
-            path="/chapters"
+            path="/courses/:courseId"
             element={
               <ProtectedRoute>
-                <Chapters />
+                <Courses />
               </ProtectedRoute>
             }
           />

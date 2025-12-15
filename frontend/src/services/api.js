@@ -68,24 +68,24 @@ export const coursesAPI = {
 };
 
 export const chaptersAPI = {
-  list: async () => {
-    const response = await api.get('/chapter/');
+  listByCourse: async (courseId) => {
+    const response = await api.get(`/courses/${courseId}/chapter`);
     return response.data;
   },
-  listByCourse: async (courseId) => {
-    const response = await api.get(`/chapter/course/${courseId}`);
+  getById: async (courseId, chapterId) => {
+    const response = await api.get(`/courses/${courseId}/chapter/${chapterId}`);
     return response.data;
   },
   create: async (courseId, chapter) => {
-    const response = await api.post(`/chapter/course/${courseId}`, chapter);
+    const response = await api.post(`/courses/${courseId}/chapter/createChapter/`, chapter);
     return response.data;
   },
-  update: async (chapterId, chapter) => {
-    const response = await api.put(`/chapter/updateChapter/${chapterId}`, chapter);
+  update: async (courseId, chapterId, chapter) => {
+    const response = await api.put(`/courses/${courseId}/chapter/updateChapter/${chapterId}`, chapter);
     return response.data;
   },
-  delete: async (chapterId) => {
-    const response = await api.delete(`/chapter/deleteChapter/${chapterId}`);
+  delete: async (courseId, chapterId) => {
+    const response = await api.delete(`/courses/${courseId}/chapter/deleteChapter/${chapterId}`);
     return response.data;
   }
 };

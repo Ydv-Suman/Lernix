@@ -7,21 +7,65 @@ const Register = () => {
     email: '',
     username: '',
     first_name: '',
+    mid_init: '',
     last_name: '',
     phone_number: '',
     password: '',
     confirmPassword: ''
   });
+  const [formattedPhone, setFormattedPhone] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  // Format phone number: +_(___)___ - ____
+  const formatPhoneNumber = (value) => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '');
+    
+    // Format: +_(___)___ - ____
+    if (digits.length === 0) return '';
+    if (digits.length <= 1) return `+${digits}`;
+    if (digits.length <= 4) return `+${digits.slice(0, 1)} (${digits.slice(1)}`;
+    if (digits.length <= 7) return `+${digits.slice(0, 1)} (${digits.slice(1, 4)}) ${digits.slice(4)}`;
+    if (digits.length <= 10) return `+${digits.slice(0, 1)} (${digits.slice(1, 4)}) ${digits.slice(4, 7)} - ${digits.slice(7)}`;
+    // Limit to 11 digits total (1 country code + 10 digits)
+    return `+${digits.slice(0, 1)} (${digits.slice(1, 4)}) ${digits.slice(4, 7)} - ${digits.slice(7, 11)}`;
+  };
+
+  const handlePhoneChange = (e) => {
+    const inputValue = e.target.value;
+    // Extract only digits from the input
+    const digits = inputValue.replace(/\D/g, '');
+    // Format the digits
+    const formatted = formatPhoneNumber(digits);
+    setFormattedPhone(formatted);
+    
+    // Store only digits in formData (limit to 11 digits)
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      phone_number: digits.slice(0, 11)
     });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Limit middle initial to 1 character
+    if (name === 'mid_init') {
+      setFormData({
+        ...formData,
+        [name]: value.toUpperCase().slice(0, 1)
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -42,6 +86,10 @@ const Register = () => {
     setLoading(true);
 
     const { confirmPassword, ...userData } = formData;
+    // Convert empty mid_init to null
+    if (userData.mid_init === '') {
+      userData.mid_init = null;
+    }
     const result = await register(userData);
 
     if (result.success) {
@@ -111,6 +159,17 @@ const Register = () => {
                     required
                   />
                 </div>
+                <div className="w-20">
+                  <input
+                    type="text"
+                    name="mid_init"
+                    placeholder="M.I."
+                    value={formData.mid_init}
+                    onChange={handleChange}
+                    maxLength={1}
+                    className="w-full px-4 py-3 bg-transparent border border-[#2D5F5D] border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:border-[#FF6B35] transition-colors text-center"
+                  />
+                </div>
                 <div className="flex-1">
                   <input
                     type="text"
@@ -128,36 +187,124 @@ const Register = () => {
                 <input
                   type="tel"
                   name="phone_number"
-                  placeholder="Phone number"
-                  value={formData.phone_number}
-                  onChange={handleChange}
+                  placeholder="+_ (___) ___ - ____"
+                  value={formattedPhone}
+                  onChange={handlePhoneChange}
                   className="w-full px-4 py-3 bg-transparent border border-[#2D5F5D] border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:border-[#FF6B35] transition-colors"
                   required
                 />
               </div>
 
-              <div>
+              <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-transparent border border-[#2D5F5D] border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:border-[#FF6B35] transition-colors"
+                  className="w-full px-4 py-3 pr-12 bg-transparent border border-[#2D5F5D] border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:border-[#FF6B35] transition-colors"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white opacity-70 hover:opacity-100 focus:outline-none transition-opacity"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  )}
+                </button>
               </div>
 
-              <div>
+              <div className="relative">
                 <input
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   placeholder="Confirm password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-transparent border border-[#2D5F5D] border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:border-[#FF6B35] transition-colors"
+                  className="w-full px-4 py-3 pr-12 bg-transparent border border-[#2D5F5D] border-opacity-30 rounded-lg text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:border-[#FF6B35] transition-colors"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white opacity-70 hover:opacity-100 focus:outline-none transition-opacity"
+                  aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                >
+                  {showConfirmPassword ? (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  )}
+                </button>
               </div>
 
               <button

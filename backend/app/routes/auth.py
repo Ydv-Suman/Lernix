@@ -41,6 +41,7 @@ class CreateUserRequest(BaseModel):
     email: str
     username: str
     first_name: str
+    mid_init: str | None = None
     last_name: str
     phone_number: str
     password: str
@@ -86,6 +87,7 @@ def create_new_user(create_user_request: CreateUserRequest, db: db_dependency):
         email=create_user_request.email,
         username=create_user_request.username,
         first_name=create_user_request.first_name,
+        mid_init=create_user_request.mid_init if create_user_request.mid_init else None,
         last_name=create_user_request.last_name,
         phone_number=create_user_request.phone_number,
         hashed_password=bcrypt_context.hash(create_user_request.password)
