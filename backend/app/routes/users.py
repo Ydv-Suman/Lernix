@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import Annotated, List
-from passlib.context import CryptContext
+from passlib.context import CryptContext  # type: ignore[reportMissingImports]
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -34,6 +34,7 @@ class UserResponse(BaseModel):
 
 @router.get('/', response_model=UserResponse, status_code=status.HTTP_200_OK)
 def get_users(db: db_dependency, user:user_dependency):
+    """Return the authenticated user's profile details."""
     if user is None :
         raise HTTPException(status_code=401, detail="Authentication Failed")
     user_obj = db.query(Users).filter(Users.id == user.get('id')).first()

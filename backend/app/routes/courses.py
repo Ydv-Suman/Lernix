@@ -18,6 +18,7 @@ class CreateCourseRequest(BaseModel):
 
 @router.get('/', status_code=status.HTTP_200_OK)
 def view_course(db:db_dependency, user:user_dependency):
+    """List all courses owned by the authenticated user."""
     if user is None:
         raise HTTPException(status_code=401, detail="Authentication Failed")
     courses = db.query(Courses).filter(Courses.owner_id == user.get('id')).all()
@@ -25,6 +26,7 @@ def view_course(db:db_dependency, user:user_dependency):
 
 @router.post('/createCourse', status_code=status.HTTP_201_CREATED)
 def create_course(user:user_dependency, db:db_dependency, add_course:CreateCourseRequest):
+    """Create a new course for the authenticated user."""
     if user is None:
         raise HTTPException(status_code=401, detail="Authentication Failed")
     
@@ -56,14 +58,15 @@ def create_course(user:user_dependency, db:db_dependency, add_course:CreateCours
 
 @router.put('/updateCourse/{course_id}', status_code=status.HTTP_202_ACCEPTED)
 def update_course(db:db_dependency, user:user_dependency, course_update:CreateCourseRequest, course_id: Annotated[int, Path(gt=0)]):
+    """Update title and description of a course owned by the authenticated user."""
     if user is None:
         raise HTTPException(status_code=401, detail="Authentication Failed")
     course = db.query(Courses).filter(Courses.id == course_id).filter(Courses.owner_id==user.get('id')).first()
     if course is None:
         raise HTTPException(status_code=404, detail="Course Not Found")
     try:
-        course.title = course_update.title
-        course.description = course_update.description
+        course.title = course_update.title  # type: ignore
+        course.description = course_update.description  # type: ignore
         db.commit()
         db.refresh(course)
         return {"message": "Course updated successfully", "course_id": course.id, "title": course.title}
@@ -74,6 +77,7 @@ def update_course(db:db_dependency, user:user_dependency, course_update:CreateCo
 
 @router.delete('/deleteCourse/{course_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_course(db:db_dependency, user:user_dependency, course_id: Annotated[int, Path(gt=0)]):
+    """Delete a course owned by the authenticated user."""
     if user is None:
         raise HTTPException(status_code=401, detail="Authentication Failed")
     course = db.query(Courses).filter(Courses.id == course_id).filter(Courses.owner_id==user.get('id')).first()

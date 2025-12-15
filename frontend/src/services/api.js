@@ -67,4 +67,27 @@ export const coursesAPI = {
   }
 };
 
+export const chaptersAPI = {
+  list: async () => {
+    const response = await api.get('/chapter/');
+    return response.data;
+  },
+  listByCourse: async (courseId) => {
+    const response = await api.get(`/chapter/course/${courseId}`);
+    return response.data;
+  },
+  create: async (courseId, chapter) => {
+    const response = await api.post(`/chapter/course/${courseId}`, chapter);
+    return response.data;
+  },
+  update: async (chapterId, chapter) => {
+    const response = await api.put(`/chapter/updateChapter/${chapterId}`, chapter);
+    return response.data;
+  },
+  delete: async (chapterId) => {
+    const response = await api.delete(`/chapter/deleteChapter/${chapterId}`);
+    return response.data;
+  }
+};
+
 export default api;

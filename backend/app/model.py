@@ -1,7 +1,12 @@
+"""ORM models for users, courses, and chapters."""
+
 from database import Base
 from sqlalchemy import Column, ForeignKey, Null, String, Integer, Boolean, UniqueConstraint
 
+
 class Users(Base):
+    """User account with identity and auth fields."""
+
     __tablename__ = "users"
 
     id              = Column(Integer, primary_key=True, index=True)
@@ -16,6 +21,8 @@ class Users(Base):
     
 
 class Courses(Base):
+    """Courses created by users, one-to-many with chapters."""
+
     __tablename__ = "courses"
 
     id              = Column(Integer, primary_key=True, index=True)
@@ -25,6 +32,8 @@ class Courses(Base):
 
 
 class Chapters(Base):
+    """Chapters belonging to courses."""
+
     __tablename__ = "chapters"
 
     id                  = Column(Integer, primary_key=True, index=True)

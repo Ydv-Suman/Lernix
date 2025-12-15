@@ -64,6 +64,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 # create new Users
 @router.post("/create", status_code=status.HTTP_201_CREATED)
 def create_new_user(create_user_request: CreateUserRequest, db: db_dependency):
+    """Register a new user ensuring unique email and username."""
     # Check if email already exists
     existing_user = db.query(Users).filter(Users.email == create_user_request.email).first()
     if existing_user:
@@ -140,6 +141,7 @@ async def get_current_user(token: Annotated[str, Depends(outh2_bearer)]):
 
 @router.post('/token', response_model=Token)
 def login_for_access_token(db: db_dependency, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    """Authenticate with username/password and return a bearer token."""
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='could not validate user')
@@ -156,6 +158,7 @@ class LoginRequest(BaseModel):
 
 @router.post("/login")
 def login_user(login_request: LoginRequest, db: db_dependency):
+    """Authenticate by email and password and return a JWT plus user details."""
     user = db.query(Users).filter(Users.email == login_request.email).first()
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
