@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from model import Base
 from database import engine
-from routes import auth, users, courses, chapters
+from routes import auth, users, courses, chapters, chapter_file
 
 
 app = FastAPI()
@@ -27,3 +27,4 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(courses.router)
 app.include_router(chapters.router)
+app.include_router(chapter_file.router)

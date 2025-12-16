@@ -1,7 +1,7 @@
 """ORM models for users, courses, and chapters."""
 
 from database import Base
-from sqlalchemy import Column, ForeignKey, Null, String, Integer, Boolean, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, Null, String, Integer, Boolean, UniqueConstraint, DateTime, func
 
 
 class Users(Base):
@@ -38,6 +38,21 @@ class Chapters(Base):
 
     id                  = Column(Integer, primary_key=True, index=True)
     chapter_title       = Column(String(255), unique=True)
-    chapter_description =  Column(String(1000), nullable=True)
+    chapter_description = Column(String(1000), nullable=True)
     course_id           = Column(Integer, ForeignKey('courses.id'))
     owner_id            = Column(Integer, ForeignKey('users.id'))
+
+class ChapterFiles(Base):
+    """ Chapters file uploaded by the users """
+
+    __tablename__ = "chapter_file"
+    id                  = Column(Integer, primary_key=True, index=True)
+    file_name   = Column(String(255), nullable=False) 
+    file_path   = Column(String(500), nullable=False)   
+    file_type   = Column(String(50), nullable=False)  
+    mime_type   = Column(String(100), nullable=False) 
+    file_size   = Column(Integer, nullable=False)  
+    owner_id    = Column(Integer, ForeignKey("users.id"))
+    chapter_id  = Column(Integer, ForeignKey("chapters.id"))
+    course_id  = Column(Integer, ForeignKey("courses.id"))
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())

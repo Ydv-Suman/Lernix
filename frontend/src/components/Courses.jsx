@@ -440,7 +440,6 @@ const Courses = () => {
 
                       {editChapterId !== chapter.id && (
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-500 whitespace-nowrap">ID: {chapter.id}</span>
                           <div className="relative">
                             <button
                               type="button"
@@ -693,8 +692,6 @@ const Courses = () => {
                         </form>
                       )}
                     </div>
-
-                    <span className="text-sm text-gray-500 whitespace-nowrap">ID: {course.id}</span>
                   </div>
                 </li>
               ))}
@@ -752,7 +749,6 @@ const Courses = () => {
                       </div>
                     </div>
                     <p className="text-gray-700 text-sm mb-3">{course.description}</p>
-                    <span className="text-xs text-gray-500">ID: {course.id}</span>
 
                     {editCourseId === course.id && (
                       <form
