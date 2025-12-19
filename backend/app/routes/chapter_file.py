@@ -74,9 +74,8 @@ async def upload_file(user:user_dependency, db:db_dependency, course_id: Annotat
         )
     
     # Generate unique filename
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     file_extension = ALLOWED_MIME_TYPES[file.content_type]
-    unique_filename = f"{timestamp}_{file.filename}"
+    unique_filename = f"{file.filename}"
     
     try:
         # Upload to S3

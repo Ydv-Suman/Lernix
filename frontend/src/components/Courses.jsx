@@ -9,7 +9,7 @@ const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [chapters, setChapters] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
-  
+
   // Course form states
   const [formData, setFormData] = useState({ title: '', description: '' });
   const [loading, setLoading] = useState(true);
@@ -63,7 +63,7 @@ const Courses = () => {
       // Fetch all courses to find the selected one
       const allCourses = await coursesAPI.list();
       const foundCourse = allCourses.find(c => c.id === id);
-      
+
       if (foundCourse) {
         setSelectedCourse(foundCourse);
         // Also update the courses list
@@ -554,22 +554,20 @@ const Courses = () => {
               <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
+                  className={`px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === 'list'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
                   type="button"
                 >
                   List
                 </button>
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
+                  className={`px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === 'grid'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
                   type="button"
                 >
                   Grid

@@ -103,9 +103,9 @@ const Chapters = () => {
 
   const startEdit = (chapter) => {
     setEditChapterId(chapter.id);
-    setEditForm({ 
-      title: chapter.chapter_title || chapter.title || '', 
-      description: chapter.chapter_description || chapter.description || '' 
+    setEditForm({
+      title: chapter.chapter_title || chapter.title || '',
+      description: chapter.chapter_description || chapter.description || ''
     });
     setMenuOpenId(null);
     setError('');
