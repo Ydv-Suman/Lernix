@@ -1,6 +1,10 @@
 from fastapi import HTTPException
 import boto3
 from botocore.exceptions import ClientError
+import PyPDF2
+import docx
+from io import BytesIO
+
 import os
 from dotenv import load_dotenv
 
@@ -68,3 +72,28 @@ def get_file_from_s3(file_key: str):
         return response['Body'].read()
     except ClientError as e:
         raise HTTPException(status_code=404, detail=f"File not found in S3: {str(e)}")
+    
+
+# RAG support
+def extract_text_from_bytes(file_bytes: bytes, filename: str) -> str:
+    if filename.lower().endswith(".pdf"):
+        reader = PyPDF2.PdfReader(BytesIO(file_bytes))
+        return "\n".join(page.extract_text() or "" for page in reader.pages)
+
+    elif filename.lower().endswith(".docx"):
+        document = docx.Document(BytesIO(file_bytes))
+        return "\n".join(p.text for p in document.paragraphs if p.text.strip())
+
+    elif filename.lower().endswith(".txt"):
+        return file_bytes.decode("utf-8")
+
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported file type"
+        )
+
+
+def get_text_from_s3(file_key: str) -> str:
+    file_bytes = get_file_from_s3(file_key)
+    return extract_text_from_bytes(file_bytes, file_key)
