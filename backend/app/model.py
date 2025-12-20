@@ -1,6 +1,6 @@
 """ORM models for users, courses, and chapters."""
 
-from database import Base
+from app.database import Base
 from sqlalchemy import Column, ForeignKey, Null, String, Integer, Boolean, UniqueConstraint, DateTime, func
 
 

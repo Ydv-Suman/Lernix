@@ -9,7 +9,15 @@ from langchain_core.prompts import PromptTemplate
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_classic.chains.retrieval import create_retrieval_chain
 from typing import List
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+openai_api_key = os.getenv("OPENAI_API_KEY")
+if openai_api_key is None:
+    raise EnvironmentError("OPENAI_API_KEY environment variable not set")
+os.environ["OPENAI_API_KEY"] = openai_api_key
 
 # 1. Chunk text
 def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]:

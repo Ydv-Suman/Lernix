@@ -11,8 +11,8 @@ from jose import jwt, JWTError
 import os
 from dotenv import load_dotenv
 
-from database import SessionLocal
-from model import Users
+from app.database import SessionLocal
+from app.model import Users
 
 router = APIRouter(
     prefix="/auth",

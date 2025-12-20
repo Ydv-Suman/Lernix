@@ -3,10 +3,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from model import Base
-from database import engine
-from routes import auth, users, courses, chapters, chapter_file
-from .ai.ai_endpoint import summarize
+from app.model import Base
+from app.database import engine
+from app.routes import auth, users, courses, chapters, chapter_file
+from app.ai.ai_endpoint import summarize
 
 
 app = FastAPI()

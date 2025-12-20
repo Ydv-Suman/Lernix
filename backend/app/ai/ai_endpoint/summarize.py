@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from ...utils.s3_helper import get_text_from_s3
-from ..services.summarizer import summarize_text
+from app.utils.s3_helper import get_text_from_s3
+from app.ai.services.summarizer import summarize_text
 
 router = APIRouter(
     prefix="/summarize", 
