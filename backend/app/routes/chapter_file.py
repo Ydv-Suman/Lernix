@@ -82,7 +82,7 @@ async def upload_file(user:user_dependency, db:db_dependency, course_id: Annotat
         s3_file_path = upload_file_to_s3(
             file_content=file_content,
             file_name=unique_filename,
-            folder=f"courses/{course_id}/chapters/{chapter_id}"
+            folder=f"users/{user.get('id')}/courses/{course_id}/chapters/{chapter_id}"
         )
         
         # Save metadata to database

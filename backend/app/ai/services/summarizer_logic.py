@@ -18,6 +18,7 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 if openai_api_key is None:
     raise EnvironmentError("OPENAI_API_KEY environment variable not set")
 os.environ["OPENAI_API_KEY"] = openai_api_key
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # 1. Chunk text
 def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]:
