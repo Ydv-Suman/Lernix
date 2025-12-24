@@ -50,3 +50,17 @@ def create_retriever(docs: List[Document]):
         retrievers=[dense_retriever, sparse_retriever],
         weights=[0.7, 0.3]
     )
+
+
+# 4. format the result
+def format_mcqs_detailed(text: str) -> str:
+    """
+    Ensure each question starts on a new line with proper spacing
+    """
+    # Normalize line endings
+    text = text.replace("\r\n", "\n").strip()
+
+    # Ensure a blank line before every Question except the first
+    text = text.replace("\nQuestion", "\n\nQuestion")
+
+    return text

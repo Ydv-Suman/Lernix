@@ -35,4 +35,7 @@ def summarize_text(text: str) -> str:
         "input": "Summarize the document"
     })
 
-    return result["answer"]
+    # Format the output
+    formatted_result = format_mcqs_detailed(result["answer"])
+    
+    return formatted_result
