@@ -36,8 +36,18 @@ const Chapters = () => {
     setLoading(true);
     setError('');
     try {
-      const data = await chaptersAPI.list();
-      setChapters(Array.isArray(data) ? data : []);
+      // Fetch all chapters by getting all courses and their chapters
+      const courses = await coursesAPI.list();
+      const allChapters = [];
+      for (const course of courses) {
+        try {
+          const chapters = await chaptersAPI.listByCourse(course.id);
+          allChapters.push(...chapters);
+        } catch (err) {
+          console.error(`Failed to fetch chapters for course ${course.id}:`, err);
+        }
+      }
+      setChapters(Array.isArray(allChapters) ? allChapters : []);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to load chapters');
     } finally {
@@ -133,7 +143,14 @@ const Chapters = () => {
     setSuccess('');
 
     try {
-      await chaptersAPI.update(editChapterId, {
+      // Find the course_id for this chapter
+      const chapter = chapters.find(c => c.id === editChapterId);
+      if (!chapter || !chapter.course_id) {
+        setError('Could not find course for this chapter');
+        return;
+      }
+
+      await chaptersAPI.update(chapter.course_id, editChapterId, {
         title: editForm.title.trim(),
         description: editForm.description.trim(),
       });
@@ -161,7 +178,14 @@ const Chapters = () => {
     setMenuOpenId(null);
 
     try {
-      await chaptersAPI.delete(chapterId);
+      // Find the course_id for this chapter
+      const chapter = chapters.find(c => c.id === chapterId);
+      if (!chapter || !chapter.course_id) {
+        setError('Could not find course for this chapter');
+        return;
+      }
+
+      await chaptersAPI.delete(chapter.course_id, chapterId);
       setSuccess('Chapter deleted successfully');
       fetchChapters();
     } catch (err) {

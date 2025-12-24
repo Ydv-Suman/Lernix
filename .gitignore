@@ -33,3 +33,8 @@ htmlcov/
 
 # Project specific
 *.log
+
+# file
+*.pdf
+*.docx
+*.txt

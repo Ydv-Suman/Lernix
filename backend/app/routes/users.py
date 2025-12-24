@@ -43,6 +43,9 @@ def get_users(db: db_dependency, user:user_dependency):
     return user_obj
 
 
+
+
+
 ## delete the use
 @router.delete('/deleteuser/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(db: db_dependency, user:user_dependency):

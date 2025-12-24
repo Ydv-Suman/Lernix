@@ -23,7 +23,7 @@ const Courses = () => {
   const [editForm, setEditForm] = useState({ title: '', description: '' });
   const createSectionRef = useRef(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [viewMode, setViewMode] = useState('list');
+  const [viewMode, setViewMode] = useState('grid');
 
   // Chapter form states
   const [chapterFormData, setChapterFormData] = useState({ title: '', description: '' });

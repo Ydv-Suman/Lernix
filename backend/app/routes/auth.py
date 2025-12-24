@@ -190,3 +190,4 @@ def login_user(login_request: LoginRequest, db: db_dependency):
             "last_name": user.last_name
         }
     }
+
