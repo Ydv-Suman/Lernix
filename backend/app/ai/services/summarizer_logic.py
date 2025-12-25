@@ -24,6 +24,19 @@ def build_rag_chain(retriever):
         combine_docs_chain=document_chain
     )
 
+def format_mcqs_detailed(text: str) -> str:
+    """
+    Ensure each question starts on a new line with proper spacing
+    """
+    # Normalize line endings
+    text = text.replace("\r\n", "\n").strip()
+
+    # Ensure a blank line before every Question except the first
+    text = text.replace("\nQuestion", "\n\nQuestion")
+
+    return text
+
+
 # 5. Main Entry Function (USED BY FASTAPI)
 def summarize_text(text: str) -> str:
     chunks = chunk_text(text)

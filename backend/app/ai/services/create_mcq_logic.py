@@ -1,6 +1,20 @@
 from app.ai.services.document_processing import *;
 
 
+
+# 4. format the result
+def format_mcqs_detailed(text: str) -> str:
+    """
+    Ensure each question starts on a new line with proper spacing
+    """
+    # Normalize line endings
+    text = text.replace("\r\n", "\n").strip()
+
+    # Ensure a blank line before every Question except the first
+    text = text.replace("\nQuestion", "\n\nQuestion")
+
+    return text
+
 def build_mcq_chain(retriever, num_questions: int = 5, difficulty: str = "medium"):
     prompt_text = f"""Based on the following content, generate {num_questions} multiple choice questions.
 
