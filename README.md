@@ -46,6 +46,8 @@ AI-generated summaries from chapter content
 
 MCQ generation from uploaded study material
 
+Ask question from uploaded study material 
+
 Designed to scale into RAG-based question answering
 
 ---
@@ -107,7 +109,7 @@ Jupyter Notebooks (.ipynb)
 
 Planned RAG pipeline
 
-Summarization & MCQ generation
+Summarization, MCQ generation, Ask Questions
 
 Vector-store ready design
 
