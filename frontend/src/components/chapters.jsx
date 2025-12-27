@@ -16,7 +16,6 @@ const Chapters = () => {
   const [editChapterId, setEditChapterId] = useState(null);
   const [editForm, setEditForm] = useState({ title: '', description: '' });
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [expandedCourses, setExpandedCourses] = useState(new Set()); // Track expanded courses
 
   useEffect(() => {
     fetchCourses();
@@ -83,9 +82,6 @@ const Chapters = () => {
       setSuccess('Chapter created successfully');
       setShowCreateForm(false);
 
-      // Expand the course that the chapter was added to
-      setExpandedCourses(prev => new Set(prev).add(parseInt(formData.courseId)));
-
       fetchChapters();
 
     } catch (err) {
@@ -97,18 +93,6 @@ const Chapters = () => {
 
   const handleMenuToggle = (chapterId) => {
     setMenuOpenId((prev) => (prev === chapterId ? null : chapterId));
-  };
-
-  const toggleCourse = (courseId) => {
-    setExpandedCourses(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(courseId)) {
-        newSet.delete(courseId);
-      } else {
-        newSet.add(courseId);
-      }
-      return newSet;
-    });
   };
 
   const startEdit = (chapter) => {
@@ -251,25 +235,13 @@ const Chapters = () => {
             <div className="space-y-4">
               {coursesWithChapters.map((course) => {
                 const courseChapters = chaptersByCourse[course.id] || [];
-                const isExpanded = expandedCourses.has(course.id);
 
                 return (
                   <div key={course.id} className="border border-gray-200 rounded-lg overflow-hidden">
                     {/* Course Header */}
-                    <div
-                      className="bg-gray-50 px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => toggleCourse(course.id)}
-                    >
+                    <div className="bg-gray-50 px-4 py-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <svg
-                            className={`w-5 h-5 text-gray-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
                           <h4 className="text-lg font-semibold text-gray-900">{course.title}</h4>
                           <span className="text-sm text-gray-500">
                             ({courseChapters.length} {courseChapters.length === 1 ? 'chapter' : 'chapters'})
@@ -280,14 +252,13 @@ const Chapters = () => {
                     </div>
 
                     {/* Chapters List */}
-                    {isExpanded && (
-                      <div className="divide-y divide-gray-200">
-                        {courseChapters.length === 0 ? (
-                          <div className="px-4 py-3 text-gray-500 text-sm">
-                            No chapters in this course yet.
-                          </div>
-                        ) : (
-                          courseChapters.map((chapter) => (
+                    <div className="divide-y divide-gray-200">
+                      {courseChapters.length === 0 ? (
+                        <div className="px-4 py-3 text-gray-500 text-sm">
+                          No chapters in this course yet.
+                        </div>
+                      ) : (
+                        courseChapters.map((chapter) => (
                             <div key={chapter.id} className="px-4 py-3 hover:bg-gray-50">
                               <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1">
@@ -382,8 +353,7 @@ const Chapters = () => {
                             </div>
                           ))
                         )}
-                      </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
