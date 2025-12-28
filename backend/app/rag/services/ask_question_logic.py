@@ -1,4 +1,4 @@
-from app.ai.services.document_processing import *
+from app.rag.services.document_processing import *
 
 def ask_question_rag_chain(retriever):
     prompt_text = """

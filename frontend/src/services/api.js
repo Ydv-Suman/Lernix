@@ -90,4 +90,29 @@ export const chaptersAPI = {
   }
 };
 
+export const chapterFilesAPI = {
+  list: async (courseId, chapterId) => {
+    const response = await api.get(`/courses/${courseId}/chapter/${chapterId}/files/`);
+    return response.data;
+  },
+  upload: async (courseId, chapterId, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post(
+      `/courses/${courseId}/chapter/${chapterId}/files/uploadFile`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+  delete: async (courseId, chapterId, fileId) => {
+    const response = await api.delete(`/courses/${courseId}/chapter/${chapterId}/files/delete/${fileId}`);
+    return response.data;
+  }
+};
+
 export default api;

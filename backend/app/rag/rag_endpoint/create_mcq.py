@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Path
 from typing import Annotated
 from app.utils.s3_helper import get_text_from_s3
-from app.ai.services.create_mcq_logic import generate_mcqs
+from app.rag.services.create_mcq_logic import generate_mcqs
 
 from app.model import Chapters, Users, Courses, ChapterFiles
 from app.routes.auth import db_dependency

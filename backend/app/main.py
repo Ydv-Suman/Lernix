@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.model import Base
 from app.database import engine
 from app.routes import auth, users, courses, chapters, chapter_file
-from app.ai.ai_endpoint import summarize, create_mcq, ask_question
+from app.rag.rag_endpoint import summarize, create_mcq, ask_question
 
 
 app = FastAPI()
