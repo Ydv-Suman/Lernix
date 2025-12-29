@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../../NavBar';
 import { chapterFilesAPI } from '../../../services/api';
-import api from '../../../services/api';
 
 const AskQuestions = () => {
   const { courseId, chapterId } = useParams();
@@ -51,11 +50,13 @@ const AskQuestions = () => {
     setAnswer('');
 
     try {
-      const response = await api.post(
-        `/courses/${courseId}/chapter/${chapterId}/files/${selectedFileId}/ask_question/`,
-        { question: question.trim() }
+      const response = await chapterFilesAPI.askQuestion(
+        parseInt(courseId),
+        parseInt(chapterId),
+        selectedFileId,
+        question
       );
-      setAnswer(response.data.answer || response.data);
+      setAnswer(response.answer || response);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to get answer');
     } finally {

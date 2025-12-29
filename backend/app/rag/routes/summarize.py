@@ -1,30 +1,22 @@
-from fastapi import APIRouter, status, HTTPException, Path
+from fastapi import APIRouter, HTTPException, status, Path
 from typing import Annotated
-from pydantic import BaseModel
 from app.utils.s3_helper import get_text_from_s3
-from app.rag.services.ask_question_logic import ask_question
+from app.rag.services.summarizer_logic import summarize_text
 
-from app.model import Users, Courses, Chapters , ChapterFiles
+from app.models import Chapters, Users, Courses, ChapterFiles
 from app.routes.auth import db_dependency
 from app.routes.users import user_dependency
 
+
 router = APIRouter(
-    prefix="/courses/{course_id}/chapter/{chapter_id}/files/{file_id}/ask_question",
-    tags=["Ask Question"]
-)
+    prefix="/courses/{course_id}/chapter/{chapter_id}/files/{file_id}/summarize", 
+    tags=["RAG"])
 
-class QuestionRequest(BaseModel):
-    question: str
 
-@router.post('/', status_code=status.HTTP_200_OK)
-def ask_questions(
-    db:db_dependency, 
-    user:user_dependency, 
-    course_id:Annotated[int, Path(gt=0)], 
-    chapter_id:Annotated[int, Path(gt=0)], 
-    file_id:Annotated[int, Path(gt=0)],
-    request: QuestionRequest
-):
+@router.post("/", status_code=status.HTTP_200_OK)
+def summarize_uploaded_file(user: user_dependency, db: db_dependency, course_id: Annotated[int, Path(gt=0)], chapter_id: Annotated[int, Path(gt=0)], file_id: Annotated[int, Path(gt=0)]):
+    """ Summarize a document stored in S3 using RAG """
+
     if user is None:
         raise HTTPException(status_code=402, detail="Authentication Failed")
     
@@ -46,18 +38,17 @@ def ask_questions(
                 detail="Document is empty or could not extract text"
             )
 
-        # 2. Run RAG question answering
-        answer = ask_question(text, request.question)
+        # 2. Run RAG summarization
+        summary = summarize_text(text)
 
         # 3. Return response
         return {
             "file_key": file_key,
-            "question": request.question,
-            "answer": answer
+            "summary": summary
         }
 
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to process question: {str(e)}"
+            detail=f"Failed to summarize document: {str(e)}"
         )

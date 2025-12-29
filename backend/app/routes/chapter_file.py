@@ -4,7 +4,7 @@ from fastapi.responses import StreamingResponse
 import io
 from datetime import datetime
 
-from app.model import Chapters, Users, Courses, ChapterFiles
+from app.models import Chapters, Users, Courses, ChapterFiles
 from .auth import db_dependency
 from .users import user_dependency
 from app.utils.s3_helper import upload_file_to_s3, delete_file_from_s3, get_file_from_s3

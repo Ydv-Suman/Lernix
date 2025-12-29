@@ -12,7 +12,7 @@ import os
 from dotenv import load_dotenv
 
 from app.database import SessionLocal
-from app.model import Users
+from app.models import Users
 
 router = APIRouter(
     prefix="/auth",

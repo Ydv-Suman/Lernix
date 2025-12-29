@@ -119,7 +119,15 @@ Lernix/
 │   │   ├── __init__.py
 │   │   ├── main.py                  # FastAPI app entry point & router registration
 │   │   ├── database.py              # SQLAlchemy database configuration
-│   │   ├── model.py                 # SQLAlchemy ORM models (Users, Courses, Chapters, ChapterFiles)
+│   │   │
+│   │   ├── models/                  # SQLAlchemy ORM models (one file per model)
+│   │   │   ├── __init__.py          # Exports all models
+│   │   │   ├── users.py             # Users model
+│   │   │   ├── courses.py           # Courses model
+│   │   │   ├── chapters.py          # Chapters model
+│   │   │   ├── chapter_files.py     # ChapterFiles model
+│   │   │   ├── learning_sessions.py # LearningSessions model
+│   │   │   └── mcq_attempt.py       # MCQAttempt model
 │   │   │
 │   │   ├── routes/                  # API route handlers
 │   │   │   ├── __init__.py
@@ -129,13 +137,14 @@ Lernix/
 │   │   │   ├── chapters.py          # Chapter CRUD operations
 │   │   │   └── chapter_file.py      # File upload/download/delete endpoints
 │   │   │
-│   │   ├── ai/                      # AI/ML functionality
-│   │   │   ├── ai_endpoint/         # AI API endpoints
+│   │   ├── rag/                     # RAG/AI/ML functionality
+│   │   │   ├── routes/              # RAG API endpoints
+│   │   │   │   ├── __init__.py
 │   │   │   │   ├── summarize.py     # Summary generation endpoint
 │   │   │   │   ├── create_mcq.py    # MCQ generation endpoint
 │   │   │   │   └── ask_question.py  # Q&A endpoint
 │   │   │   │
-│   │   │   ├── services/            # AI service logic
+│   │   │   ├── services/            # RAG service logic
 │   │   │   │   ├── summarizer_logic.py      # Summary generation logic
 │   │   │   │   ├── create_mcq_logic.py      # MCQ generation logic
 │   │   │   │   ├── ask_question_logic.py    # Q&A RAG logic
@@ -146,6 +155,11 @@ Lernix/
 │   │   │       ├── create_mcq.ipynb
 │   │   │       ├── ask_question.ipynb
 │   │   │       └── data/            # Sample documents for testing
+│   │   │
+│   │   ├── insights/                # Learning insights & analytics
+│   │   │   ├── __init__.py
+│   │   │   ├── routes/              # Insights API endpoints
+│   │   │   └── services/            # Insights service logic
 │   │   │
 │   │   ├── utils/                   # Utility functions
 │   │   │   ├── __init_.py
@@ -169,9 +183,14 @@ Lernix/
 │   │   │   ├── NavBar.jsx           # Navigation bar component
 │   │   │   ├── Login.jsx            # Login page
 │   │   │   ├── Register.jsx         # Registration page
-│   │   │   ├── Courses.jsx          # Course management page
-│   │   │   ├── chapters.jsx         # Chapter management page
-│   │   │   └── ProtectedRoute.jsx   # Route protection wrapper
+│   │   │   ├── ProtectedRoute.jsx   # Route protection wrapper
+│   │   │   └── course/              # Course-related components
+│   │   │       ├── Courses.jsx      # Course management page
+│   │   │       ├── chapters.jsx     # Chapter management page
+│   │   │       └── chapters/        # Chapter feature components
+│   │   │           ├── Summarize.jsx      # AI summary generation UI
+│   │   │           ├── create-mcq.jsx     # MCQ generation UI
+│   │   │           └── ask-questions.jsx  # Q&A interface UI
 │   │   │
 │   │   ├── context/                 # React context providers
 │   │   │   └── AuthContext.jsx      # Authentication context
@@ -194,5 +213,5 @@ User
      └── Chapter
          └── Files (PDF / DOCX / TXT)
              ├── Stored in AWS S3
-             └── Metadata in MySQL
+             └── Metadata in PostgreSQL
 ```

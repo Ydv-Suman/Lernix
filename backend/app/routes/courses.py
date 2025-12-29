@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, status, Path
 from pydantic import BaseModel
 
-from app.model import Courses, Users
+from app.models import Courses, Users
 from .auth import db_dependency
 from .users import user_dependency
 

@@ -1,22 +1,18 @@
 from fastapi import APIRouter, HTTPException, status, Path
 from typing import Annotated
 from app.utils.s3_helper import get_text_from_s3
-from app.rag.services.summarizer_logic import summarize_text
+from app.rag.services.create_mcq_logic import generate_mcqs
 
-from app.model import Chapters, Users, Courses, ChapterFiles
+from app.models import Chapters, Users, Courses, ChapterFiles
 from app.routes.auth import db_dependency
 from app.routes.users import user_dependency
-
-
 router = APIRouter(
-    prefix="/courses/{course_id}/chapter/{chapter_id}/files/{file_id}/summarize", 
-    tags=["summarize"])
+    prefix='/courses/{course_id}/chapter/{chapter_id}/files/{file_id}/createMCQ',
+    tags=["RAG"]
+)
 
-
-@router.post("/", status_code=status.HTTP_200_OK)
-def summarize_uploaded_file(user: user_dependency, db: db_dependency, course_id: Annotated[int, Path(gt=0)], chapter_id: Annotated[int, Path(gt=0)], file_id: Annotated[int, Path(gt=0)]):
-    """ Summarize a document stored in S3 using RAG """
-
+@router.post('/', status_code=status.HTTP_200_OK)
+def create_mcq(db:db_dependency, user:user_dependency, course_id:Annotated[int, Path(gt=0)], chapter_id:Annotated[int, Path(gt=0)], file_id:Annotated[int, Path(gt=0)]):
     if user is None:
         raise HTTPException(status_code=402, detail="Authentication Failed")
     
@@ -38,13 +34,13 @@ def summarize_uploaded_file(user: user_dependency, db: db_dependency, course_id:
                 detail="Document is empty or could not extract text"
             )
 
-        # 2. Run RAG summarization
-        summary = summarize_text(text)
+        # 2. Run ask question RAG
+        mcq = generate_mcqs(text)
 
         # 3. Return response
         return {
             "file_key": file_key,
-            "summary": summary
+            "MCQ": mcq
         }
 
     except Exception as e:

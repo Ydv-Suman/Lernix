@@ -4,7 +4,7 @@ from passlib.context import CryptContext  # type: ignore[reportMissingImports]
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
-from app.model import Users
+from app.models import Users
 from .auth import get_db, get_current_user
 
 router = APIRouter(

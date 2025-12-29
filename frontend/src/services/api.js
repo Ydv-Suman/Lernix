@@ -112,6 +112,25 @@ export const chapterFilesAPI = {
   delete: async (courseId, chapterId, fileId) => {
     const response = await api.delete(`/courses/${courseId}/chapter/${chapterId}/files/delete/${fileId}`);
     return response.data;
+  },
+  askQuestion: async (courseId, chapterId, fileId, question) => {
+    const response = await api.post(
+      `/courses/${courseId}/chapter/${chapterId}/files/${fileId}/ask_question/`,
+      { question: question.trim() }
+    );
+    return response.data;
+  },
+  summarize: async (courseId, chapterId, fileId) => {
+    const response = await api.post(
+      `/courses/${courseId}/chapter/${chapterId}/files/${fileId}/summarize/`
+    );
+    return response.data;
+  },
+  createMCQ: async (courseId, chapterId, fileId) => {
+    const response = await api.post(
+      `/courses/${courseId}/chapter/${chapterId}/files/${fileId}/createMCQ/`
+    );
+    return response.data;
   }
 };
 

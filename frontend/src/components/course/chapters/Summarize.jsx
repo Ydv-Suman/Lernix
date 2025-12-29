@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../../NavBar';
 import { chapterFilesAPI } from '../../../services/api';
-import api from '../../../services/api';
 
 const Summarize = () => {
   const { courseId, chapterId } = useParams();
@@ -45,10 +44,12 @@ const Summarize = () => {
     setSummary('');
 
     try {
-      const response = await api.post(
-        `/courses/${courseId}/chapter/${chapterId}/files/${selectedFileId}/summarize/`
+      const response = await chapterFilesAPI.summarize(
+        parseInt(courseId),
+        parseInt(chapterId),
+        selectedFileId
       );
-      setSummary(response.data.summary || response.data);
+      setSummary(response.summary || response);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to generate summary');
     } finally {

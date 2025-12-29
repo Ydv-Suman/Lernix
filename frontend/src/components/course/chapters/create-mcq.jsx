@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../../NavBar';
 import { chapterFilesAPI } from '../../../services/api';
-import api from '../../../services/api';
 
 const CreateMcq = () => {
   const { courseId, chapterId } = useParams();
@@ -45,10 +44,12 @@ const CreateMcq = () => {
     setMcqs(null);
 
     try {
-      const response = await api.post(
-        `/courses/${courseId}/chapter/${chapterId}/files/${selectedFileId}/createMCQ/`
+      const response = await chapterFilesAPI.createMCQ(
+        parseInt(courseId),
+        parseInt(chapterId),
+        selectedFileId
       );
-      setMcqs(response.data);
+      setMcqs(response);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to generate MCQs');
     } finally {
@@ -166,4 +167,5 @@ const CreateMcq = () => {
 };
 
 export default CreateMcq;
+
 
