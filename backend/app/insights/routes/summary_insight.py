@@ -1,0 +1,28 @@
+from typing import Annotated
+from fastapi import APIRouter, Depends, Query, status, HTTPException
+from sqlalchemy.orm import Session
+
+from app.routes.auth import db_dependency
+from app.routes.users import user_dependency
+from app.insights.services.summary_time import get_summary_time_by_chapter
+from app.models import Chapters, Courses
+
+router = APIRouter(
+    prefix="/insights",
+    tags=["Insights"]
+)
+
+
+@router.get("/summary-time")
+def summary_time_insights(db:db_dependency, user:user_dependency, course_id:Annotated[int, Query(gt=0)]):
+    """ Chapter-wise summarization time for line graph """
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication Failed")
+    
+    # Verify that the course exists and belongs to the user
+    course = db.query(Courses).filter(Courses.id == course_id, Courses.owner_id == user.get('id')).first()
+    
+    if not course:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found" )
+    
+    return get_summary_time_by_chapter(db=db,owner_id=user.get("id"),course_id=course_id)
