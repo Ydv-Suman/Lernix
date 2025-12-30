@@ -7,6 +7,7 @@ from app.rag.services.summarizer_logic import summarize_text
 from app.models import Chapters, Users, Courses, ChapterFiles, LearningSessions
 from app.routes.auth import db_dependency
 from app.routes.users import user_dependency
+from app.insights.services.course_time_totals_sync import update_course_time_total
 
 
 router = APIRouter(
@@ -63,6 +64,15 @@ def summarize_uploaded_file(user: user_dependency, db: db_dependency, course_id:
         )
         db.add(learning_session)
         db.commit()
+        
+        # Update course time total
+        update_course_time_total(
+            db=db,
+            owner_id=user.get('id'),
+            course_id=course_id,
+            duration_seconds=duration_seconds,
+            is_add=True
+        )
 
         # 4. Return response
         return {

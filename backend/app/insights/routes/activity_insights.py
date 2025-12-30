@@ -13,8 +13,8 @@ router = APIRouter(
 )
 
 
-@router.get("/summary-time")
-def summary_time_insights(
+@router.get("/activity-time")
+def activity_time_insights(
     db: db_dependency, 
     user: user_dependency, 
     course_id: Annotated[int, Query(gt=0)],

@@ -7,6 +7,7 @@ from app.rag.services.create_mcq_logic import generate_mcqs
 from app.models import Chapters, LearningSessions, Users, Courses, ChapterFiles
 from app.routes.auth import db_dependency
 from app.routes.users import user_dependency
+from app.insights.services.course_time_totals_sync import update_course_time_total
 router = APIRouter(
     prefix='/courses/{course_id}/chapter/{chapter_id}/files/{file_id}/createMCQ',
     tags=["RAG"]
@@ -59,6 +60,15 @@ def create_mcq(db:db_dependency, user:user_dependency, course_id:Annotated[int, 
         )
         db.add(learning_session)
         db.commit()
+        
+        # Update course time total
+        update_course_time_total(
+            db=db,
+            owner_id=user.get('id'),
+            course_id=course_id,
+            duration_seconds=duration_seconds,
+            is_add=True
+        )
 
 
         # 4. Return response

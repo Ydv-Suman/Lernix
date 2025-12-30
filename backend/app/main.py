@@ -7,7 +7,7 @@ from app.models import Base
 from app.database import engine
 from app.routes import auth, users, courses, chapters, chapter_file
 from app.rag.routes import summarize, create_mcq, ask_question
-from app.insights.routes import summary_insight
+from app.insights.routes import activity_insights, total_time_insights
 
 
 app = FastAPI()
@@ -33,4 +33,5 @@ app.include_router(chapter_file.router)
 app.include_router(summarize.router)
 app.include_router(create_mcq.router)
 app.include_router(ask_question.router)
-app.include_router(summary_insight.router)
+app.include_router(activity_insights.router)
+app.include_router(total_time_insights.router)

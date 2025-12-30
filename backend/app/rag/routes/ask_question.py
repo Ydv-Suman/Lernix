@@ -8,6 +8,7 @@ from app.rag.services.ask_question_logic import ask_question
 from app.models import LearningSessions, Users, Courses, Chapters , ChapterFiles
 from app.routes.auth import db_dependency
 from app.routes.users import user_dependency
+from app.insights.services.course_time_totals_sync import update_course_time_total
 
 router = APIRouter(
     prefix="/courses/{course_id}/chapter/{chapter_id}/files/{file_id}/ask_question",
@@ -71,6 +72,15 @@ def ask_questions(
         )
         db.add(learning_session)
         db.commit()
+        
+        # Update course time total
+        update_course_time_total(
+            db=db,
+            owner_id=user.get('id'),
+            course_id=course_id,
+            duration_seconds=duration_seconds,
+            is_add=True
+        )
 
 
         # 4. Return response
