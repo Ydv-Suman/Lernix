@@ -28,7 +28,7 @@ Chapters are nested under courses (no separate chapter navigation)
 
 ---
 
-## 📂 File Uploads (Per Chapter)
+## 📂 File Management (Per Chapter)
 
 Upload PDF, DOCX, TXT files under chapters
 
@@ -37,6 +37,10 @@ Files stored securely in AWS S3
 Metadata stored in PostgreSQL
 
 Ownership & access control enforced via backend
+
+**View File Content**: Click "View Content" button to see extracted text from PDF, DOCX, TXT files in a modal popup
+
+**Delete Files**: Click "Delete" button with confirmation dialog to remove files from S3 and database
 
 ---
 
@@ -49,6 +53,18 @@ MCQ generation from uploaded study material
 Ask question from uploaded study material
 
 Designed to scale into RAG-based question answering
+
+---
+
+## 📊 Learning Insights & Analytics
+
+Track total time spent per course
+
+Activity time tracking (summary, MCQ, Q&A sessions)
+
+MCQ attempts and performance insights
+
+Visual dashboard for learning analytics
 
 ---
 
@@ -127,7 +143,8 @@ Lernix/
 │   │   │   ├── chapters.py          # Chapters model
 │   │   │   ├── chapter_files.py     # ChapterFiles model
 │   │   │   ├── learning_sessions.py # LearningSessions model
-│   │   │   └── mcq_attempt.py       # MCQAttempt model
+│   │   │   ├── mcq_attempt.py       # MCQAttempt model
+│   │   │   └── course_time_totals.py # CourseTimeTotals model
 │   │   │
 │   │   ├── routes/                  # API route handlers
 │   │   │   ├── __init__.py
@@ -135,11 +152,11 @@ Lernix/
 │   │   │   ├── users.py             # User management endpoints
 │   │   │   ├── courses.py           # Course CRUD operations
 │   │   │   ├── chapters.py          # Chapter CRUD operations
-│   │   │   └── chapter_file.py      # File upload/download/delete endpoints
+│   │   │   └── chapter_file.py      # File upload/view content/delete endpoints
 │   │   │
 │   │   ├── rag/                     # RAG/AI/ML functionality
 │   │   │   ├── routes/              # RAG API endpoints
-│   │   │   │   ├── __init__.py
+│   │   │   │   ├── __init_.py       # Note: actual filename (typo in codebase)
 │   │   │   │   ├── summarize.py     # Summary generation endpoint
 │   │   │   │   ├── create_mcq.py    # MCQ generation endpoint
 │   │   │   │   └── ask_question.py  # Q&A endpoint
@@ -155,15 +172,22 @@ Lernix/
 │   │   │       ├── create_mcq.ipynb
 │   │   │       ├── ask_question.ipynb
 │   │   │       └── data/            # Sample documents for testing
+│   │   │           └── Interpersonal_Communication_with_Strangers.pdf
 │   │   │
 │   │   ├── insights/                # Learning insights & analytics
 │   │   │   ├── __init__.py
 │   │   │   ├── routes/              # Insights API endpoints
+│   │   │   │   ├── activity_insights.py      # Activity time tracking endpoints
+│   │   │   │   ├── mcq_insights.py           # MCQ attempts insights endpoints
+│   │   │   │   └── total_time_insights.py    # Total time spent endpoints
 │   │   │   └── services/            # Insights service logic
+│   │   │       ├── activity_time_tracker.py  # Activity time tracking logic
+│   │   │       ├── course_time_totals_sync.py # Course time totals sync
+│   │   │       └── total_time_spent.py       # Total time calculation logic
 │   │   │
 │   │   ├── utils/                   # Utility functions
 │   │   │   ├── __init_.py
-│   │   │   └── s3_helper.py         # AWS S3 file operations (upload, download, delete)
+│   │   │   └── s3_helper.py         # AWS S3 file operations (upload, download, delete, text extraction)
 │   │   │
 │   │   └── test/                    # Test files
 │   │       ├── __init__.py
@@ -184,13 +208,15 @@ Lernix/
 │   │   │   ├── Login.jsx            # Login page
 │   │   │   ├── Register.jsx         # Registration page
 │   │   │   ├── ProtectedRoute.jsx   # Route protection wrapper
-│   │   │   └── course/              # Course-related components
-│   │   │       ├── Courses.jsx      # Course management page
-│   │   │       ├── chapters.jsx     # Chapter management page
-│   │   │       └── chapters/        # Chapter feature components
-│   │   │           ├── Summarize.jsx      # AI summary generation UI
-│   │   │           ├── create-mcq.jsx     # MCQ generation UI
-│   │   │           └── ask-questions.jsx  # Q&A interface UI
+│   │   │   ├── course/              # Course-related components
+│   │   │   │   ├── Courses.jsx      # Course management page
+│   │   │   │   ├── chapters.jsx     # Chapter management page (with file upload/view/delete)
+│   │   │   │   └── chapters/        # Chapter feature components
+│   │   │   │       ├── Summarize.jsx      # AI summary generation UI
+│   │   │   │       ├── create-mcq.jsx     # MCQ generation UI
+│   │   │   │       └── ask-questions.jsx  # Q&A interface UI
+│   │   │   └── insights/            # Insights components
+│   │   │       └── insights.jsx      # Learning insights & analytics dashboard
 │   │   │
 │   │   ├── context/                 # React context providers
 │   │   │   └── AuthContext.jsx      # Authentication context

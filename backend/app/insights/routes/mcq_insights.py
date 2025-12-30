@@ -45,7 +45,7 @@ def mcq_attempts_insights(
         .outerjoin(
             MCQAttempt,
             (MCQAttempt.chapter_id == Chapters.id) &
-            (MCQAttempt.user_id == user.get('id')) &
+            (MCQAttempt.owner_id == user.get('id')) &
             (MCQAttempt.course_id == course_id)
         )
         .filter(

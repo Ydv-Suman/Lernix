@@ -8,7 +8,7 @@ class MCQAttempt(Base):
     __tablename__ = "mcq_attempts"
 
     id                  = Column(Integer, primary_key=True, index=True)
-    user_id             = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner_id             = Column(Integer, ForeignKey("users.id"), nullable=False)
     course_id           = Column(Integer, ForeignKey("courses.id"), nullable=False)
     chapter_id          = Column(Integer, ForeignKey("chapters.id"), nullable=False)
     total_questions     = Column(Integer, nullable=False)

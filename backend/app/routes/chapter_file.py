@@ -7,7 +7,7 @@ from datetime import datetime
 from app.models import Chapters, Users, Courses, ChapterFiles
 from .auth import db_dependency
 from .users import user_dependency
-from app.utils.s3_helper import upload_file_to_s3, delete_file_from_s3, get_file_from_s3
+from app.utils.s3_helper import upload_file_to_s3, delete_file_from_s3, get_file_from_s3, get_text_from_s3
 
 
 router = APIRouter(
@@ -114,6 +114,38 @@ async def upload_file(user:user_dependency, db:db_dependency, course_id: Annotat
         raise HTTPException(
             status_code=500,
             detail=f"Failed to upload file: {str(e)}"
+        )
+
+
+@router.get('/{file_id}/content', status_code=status.HTTP_200_OK)
+def get_file_content(user:user_dependency, db:db_dependency, course_id: Annotated[int, Path(gt=0)], chapter_id: Annotated[int, Path(gt=0)], file_id: Annotated[int, Path(gt=0)]):
+    """Get the text content of a file"""
+    
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication Failed")
+    
+    chapter = db.query(Chapters).filter(Chapters.id == chapter_id, Chapters.course_id == course_id, Chapters.owner_id == user.get('id')).first()
+    if chapter is None:
+        raise HTTPException(status_code=404, detail="Chapter Not Found")
+    
+    file = db.query(ChapterFiles).filter(ChapterFiles.id == file_id, ChapterFiles.chapter_id == chapter_id, ChapterFiles.owner_id == user.get('id')).first()
+    if file is None:
+        raise HTTPException(status_code=404, detail="File Not Found")
+    
+    try:
+        # Get text content from S3
+        file_path: str = str(file.file_path)
+        text_content = get_text_from_s3(file_path)
+        
+        return {
+            "file_id": file.id,
+            "file_name": file.file_name,
+            "content": text_content
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve file content: {str(e)}"
         )
 
 

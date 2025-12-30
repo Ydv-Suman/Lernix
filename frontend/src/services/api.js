@@ -109,6 +109,10 @@ export const chapterFilesAPI = {
     );
     return response.data;
   },
+  getContent: async (courseId, chapterId, fileId) => {
+    const response = await api.get(`/courses/${courseId}/chapter/${chapterId}/files/${fileId}/content`);
+    return response.data;
+  },
   delete: async (courseId, chapterId, fileId) => {
     const response = await api.delete(`/courses/${courseId}/chapter/${chapterId}/files/delete/${fileId}`);
     return response.data;
@@ -129,6 +133,17 @@ export const chapterFilesAPI = {
   createMCQ: async (courseId, chapterId, fileId) => {
     const response = await api.post(
       `/courses/${courseId}/chapter/${chapterId}/files/${fileId}/createMCQ/`
+    );
+    return response.data;
+  },
+  submitMCQ: async (courseId, chapterId, fileId, answers, timeSpent, fullQuestions = null) => {
+    const response = await api.post(
+      `/courses/${courseId}/chapter/${chapterId}/files/${fileId}/createMCQ/submit`,
+      {
+        answers: answers,
+        time_spent_seconds: timeSpent,
+        full_questions: fullQuestions
+      }
     );
     return response.data;
   }

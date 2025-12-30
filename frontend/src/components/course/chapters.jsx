@@ -22,6 +22,9 @@ const Chapters = () => {
   const [editForm, setEditForm] = useState({ title: '', description: '' });
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [uploadingChapterId, setUploadingChapterId] = useState(null);
+  const [viewingFileContent, setViewingFileContent] = useState(null); // { fileId, content, fileName }
+  const [loadingFileContent, setLoadingFileContent] = useState(null); // fileId being loaded
+  const [deletingFileId, setDeletingFileId] = useState(null); // fileId being deleted
 
   useEffect(() => {
     if (courseId) {
@@ -131,6 +134,82 @@ const Chapters = () => {
       // Reset file input
       const input = document.getElementById(`file-input-${chapterId}`);
       if (input) input.value = '';
+    }
+  };
+
+  const handleViewFileContent = async (fileId, fileName) => {
+    if (!courseId) return;
+
+    setLoadingFileContent(fileId);
+    setError('');
+    
+    try {
+      // Find the chapter ID for this file
+      let chapterId = null;
+      for (const [chId, files] of Object.entries(chapterFiles)) {
+        if (files.some(f => f.id === fileId)) {
+          chapterId = parseInt(chId);
+          break;
+        }
+      }
+
+      if (!chapterId) {
+        setError('Chapter not found for this file');
+        return;
+      }
+
+      const response = await chapterFilesAPI.getContent(parseInt(courseId), chapterId, fileId);
+      setViewingFileContent({
+        fileId,
+        fileName: response.file_name || fileName,
+        content: response.content
+      });
+    } catch (err) {
+      setError(err.response?.data?.detail || `Failed to load file content: ${err.message}`);
+    } finally {
+      setLoadingFileContent(null);
+    }
+  };
+
+  const closeFileContent = () => {
+    setViewingFileContent(null);
+  };
+
+  const handleDeleteFile = async (fileId, fileName) => {
+    if (!window.confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    if (!courseId) return;
+
+    setDeletingFileId(fileId);
+    setError('');
+    setSuccess('');
+
+    try {
+      // Find the chapter ID for this file
+      let chapterId = null;
+      for (const [chId, files] of Object.entries(chapterFiles)) {
+        if (files.some(f => f.id === fileId)) {
+          chapterId = parseInt(chId);
+          break;
+        }
+      }
+
+      if (!chapterId) {
+        setError('Chapter not found for this file');
+        return;
+      }
+
+      await chapterFilesAPI.delete(parseInt(courseId), chapterId, fileId);
+      setSuccess(`File "${fileName}" deleted successfully`);
+      
+      // Refresh files for this chapter
+      await fetchChapterFiles(chapterId);
+    } catch (err) {
+      setError(err.response?.data?.detail || `Failed to delete file: ${err.message}`);
+    } finally {
+      setDeletingFileId(null);
     }
   };
 
@@ -410,14 +489,34 @@ const Chapters = () => {
                               <>
                                 <section className="bg-gray-50 rounded-lg p-3">
                                   <h6 className="text-sm font-semibold text-gray-700 mb-2">Files ({chapterFiles[chapter.id].length})</h6>
-                                  <ul className="space-y-1">
+                                  <ul className="space-y-2">
                                     {chapterFiles[chapter.id].map((file) => (
-                                      <li key={file.id} className="text-sm text-gray-600 flex items-center gap-2">
-                                        <span className="text-xs">📄</span>
-                                        <span>{file.file_name}</span>
-                                        <span className="text-xs text-gray-500">
-                                          ({(file.file_size / 1024).toFixed(2)} KB)
-                                        </span>
+                                      <li key={file.id} className="text-sm text-gray-600 flex items-center justify-between gap-2">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xs">📄</span>
+                                          <span>{file.file_name}</span>
+                                          <span className="text-xs text-gray-500">
+                                            ({(file.file_size / 1024).toFixed(2)} KB)
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleViewFileContent(file.id, file.file_name)}
+                                            disabled={loadingFileContent === file.id}
+                                            className="px-2 py-1 bg-indigo-600 text-white text-xs rounded-md hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
+                                          >
+                                            {loadingFileContent === file.id ? 'Loading...' : 'View Content'}
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteFile(file.id, file.file_name)}
+                                            disabled={deletingFileId === file.id}
+                                            className="px-2 py-1 bg-red-600 text-white text-xs rounded-md hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+                                          >
+                                            {deletingFileId === file.id ? 'Deleting...' : 'Delete'}
+                                          </button>
+                                        </div>
                                       </li>
                                     ))}
                                   </ul>
@@ -570,6 +669,40 @@ const Chapters = () => {
               </div>
             </form>
           </section>
+        )}
+
+        {/* File Content Modal */}
+        {viewingFileContent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+              <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {viewingFileContent.fileName}
+                </h3>
+                <button
+                  type="button"
+                  onClick={closeFileContent}
+                  className="text-gray-400 hover:text-gray-600 text-2xl font-bold cursor-pointer"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans">
+                  {viewingFileContent.content}
+                </pre>
+              </div>
+              <div className="p-4 border-t border-gray-200 flex justify-end">
+                <button
+                  type="button"
+                  onClick={closeFileContent}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>
