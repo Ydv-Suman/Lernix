@@ -134,4 +134,28 @@ export const chapterFilesAPI = {
   }
 };
 
+export const insightsAPI = {
+  getTotalTimeByCourse: async () => {
+    const response = await api.get('/insights/total-time');
+    return response.data;
+  },
+  getActivityTimeByChapter: async (courseId, activityType = 'summary') => {
+    const response = await api.get('/insights/activity-time', {
+      params: { course_id: courseId, activity_type: activityType }
+    });
+    return response.data;
+  },
+  // Placeholder for MCQ attempts - to be implemented
+  getMCQAttempts: async (courseId) => {
+    // This endpoint needs to be created in the backend
+    try {
+      const response = await api.get(`/insights/mcq-attempts?course_id=${courseId}`);
+      return response.data;
+    } catch (error) {
+      // Return empty array if endpoint doesn't exist yet
+      return [];
+    }
+  }
+};
+
 export default api;

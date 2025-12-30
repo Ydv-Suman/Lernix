@@ -7,6 +7,7 @@ import Chapters from './components/course/chapters';
 import Summarize from './components/course/chapters/Summarize';
 import AskQuestions from './components/course/chapters/ask-questions';
 import CreateMcq from './components/course/chapters/create-mcq';
+import Insights from './components/insights/insights';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -54,6 +55,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreateMcq />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/insights"
+            element={
+              <ProtectedRoute>
+                <Insights />
               </ProtectedRoute>
             }
           />

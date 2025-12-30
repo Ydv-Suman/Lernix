@@ -7,8 +7,14 @@ from app.models.chapters import Chapters
 def get_activity_time_by_chapter(db: Session, owner_id: int, course_id: int, activity_type: str):
     """ Returns chapter-wise total time spent for a given activity: summary | ask | mcq """
     
+    # Normalize activity_type - handle both "ask" and "ask_question"
+    if activity_type == "ask":
+        activity_types = ["ask", "ask_question"]
+    else:
+        activity_types = [activity_type]
+    
     # Validate activity_type
-    valid_activity_types = ("summary", "ask", "mcq")
+    valid_activity_types = ("summary", "ask", "ask_question", "mcq")
     if activity_type not in valid_activity_types:
         raise ValueError(f"activity_type must be one of {valid_activity_types}, got: {activity_type}")
 
@@ -25,7 +31,7 @@ def get_activity_time_by_chapter(db: Session, owner_id: int, course_id: int, act
                 LearningSessions.chapter_id == Chapters.id,
                 LearningSessions.owner_id == owner_id,
                 LearningSessions.course_id == course_id,
-                LearningSessions.activity_type == activity_type,
+                LearningSessions.activity_type.in_(activity_types),
                 LearningSessions.is_valid == True
             )
         )

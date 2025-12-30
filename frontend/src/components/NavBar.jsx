@@ -47,7 +47,7 @@ const NavBar = () => {
             </h1>
             <div className="flex items-center gap-3 text-xl font-semibold text-gray-900">
               <div><Link to="/courses">Courses</Link></div>
-              <div><Link to="/#">Notes</Link></div>
+              <div><Link to="/insights">Insights</Link></div>
             </div>
           </div>
 
