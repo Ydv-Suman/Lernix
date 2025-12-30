@@ -8,6 +8,7 @@ import Summarize from './components/course/chapters/Summarize';
 import AskQuestions from './components/course/chapters/ask-questions';
 import CreateMcq from './components/course/chapters/create-mcq';
 import Insights from './components/insights/insights';
+import About from './components/About';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -66,6 +67,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/about" element={<About />} />
           <Route path="/" element={<Navigate to="/courses" replace />} />
         </Routes>
       </Router>
