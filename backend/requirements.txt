@@ -20,39 +20,24 @@ python-dotenv
 boto3
 
 # PDF Processing
-pypdf
-pymupdf
 PyPDF2
 
 # Document Processing
 python-docx
 docx2txt
 
-# LangChain Core
+# LangChain Core (required for RAG functionality)
 langchain
 langchain-community
 langchain-openai
-langchain-groq
 langchain-classic
 langchain-text-splitters
 langchain-huggingface
-langchain-experimental
 
 # Vector Stores and Retrieval
+# faiss-cpu - Required for langchain_community.vectorstores.FAISS
 faiss-cpu
-chromadb
+# rank_bm25 - Required for langchain_community.retrievers.BM25Retriever
 rank_bm25
-tiktoken
+# sentence-transformers - Required by langchain-huggingface for HuggingFaceEmbeddings
 sentence-transformers
-
-# Data Processing
-pandas
-openpyxl
-jq
-matplotlib
-
-# AI / ML Utilities
-wikipedia
-
-# Jupyter / Dev Tools
-ipykernel
