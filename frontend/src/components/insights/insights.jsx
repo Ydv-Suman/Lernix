@@ -73,11 +73,19 @@ const Insights = () => {
         insightsAPI.getActivityTimeByChapter(courseId, 'mcq')
       ]);
 
-      setSummaryData(summary || []);
-      setAskData(ask || []);
-      setMcqData(mcq || []);
+      // Convert time from seconds to minutes
+      const convertToMinutes = (data) => {
+        return (data || []).map(item => ({
+          ...item,
+          time_spent_seconds: Math.round(item.time_spent_seconds / 60)
+        }));
+      };
 
-      // Calculate total time per chapter
+      setSummaryData(convertToMinutes(summary));
+      setAskData(convertToMinutes(ask));
+      setMcqData(convertToMinutes(mcq));
+
+      // Calculate total time per chapter (convert to minutes)
       const chapterMap = new Map();
       chaptersData.forEach(ch => {
         chapterMap.set(ch.id, { chapter_id: ch.id, chapter_name: ch.chapter_title, total: 0 });
@@ -89,7 +97,12 @@ const Insights = () => {
         }
       });
 
-      setTotalTimeData(Array.from(chapterMap.values()));
+      // Convert total seconds to minutes
+      const totalTimeDataInMinutes = Array.from(chapterMap.values()).map(item => ({
+        ...item,
+        total: Math.round(item.total / 60)
+      }));
+      setTotalTimeData(totalTimeDataInMinutes);
 
       // Fetch MCQ attempts
       const mcqAttemptsData = await insightsAPI.getMCQAttempts(courseId);
@@ -115,13 +128,9 @@ const Insights = () => {
   };
 
   const formatTime = (seconds) => {
-    if (!seconds) return '0s';
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    if (minutes > 0) return `${minutes}m ${secs}s`;
-    return `${secs}s`;
+    if (!seconds) return '0 min';
+    const minutes = Math.round(seconds / 60);
+    return `${minutes} min`;
   };
 
   const generateRecommendations = () => {
@@ -240,13 +249,13 @@ const Insights = () => {
                         fontSize={10}
                       />
                       <YAxis />
-                      <Tooltip formatter={(value) => formatTime(value)} />
+                      <Tooltip formatter={(value) => `${value} min`} />
                       <Line 
                         type="monotone" 
                         dataKey="time_spent_seconds" 
                         stroke="#3b82f6" 
                         strokeWidth={2}
-                        name="Time (seconds)"
+                        name="Time (minutes)"
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -266,13 +275,13 @@ const Insights = () => {
                         fontSize={10}
                       />
                       <YAxis />
-                      <Tooltip formatter={(value) => formatTime(value)} />
+                      <Tooltip formatter={(value) => `${value} min`} />
                       <Line 
                         type="monotone" 
                         dataKey="time_spent_seconds" 
                         stroke="#10b981" 
                         strokeWidth={2}
-                        name="Time (seconds)"
+                        name="Time (minutes)"
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -292,13 +301,13 @@ const Insights = () => {
                         fontSize={10}
                       />
                       <YAxis />
-                      <Tooltip formatter={(value) => formatTime(value)} />
+                      <Tooltip formatter={(value) => `${value} min`} />
                       <Line 
                         type="monotone" 
                         dataKey="time_spent_seconds" 
                         stroke="#f59e0b" 
                         strokeWidth={2}
-                        name="Time (seconds)"
+                        name="Time (minutes)"
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -321,8 +330,8 @@ const Insights = () => {
                         fontSize={10}
                       />
                       <YAxis />
-                      <Tooltip formatter={(value) => formatTime(value)} />
-                      <Bar dataKey="total" fill="#8b5cf6" name="Total Time" />
+                      <Tooltip formatter={(value) => `${value} min`} />
+                      <Bar dataKey="total" fill="#8b5cf6" name="Total Time (minutes)" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

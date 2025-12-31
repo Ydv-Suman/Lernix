@@ -22,7 +22,7 @@ const Chapters = () => {
   const [editForm, setEditForm] = useState({ title: '', description: '' });
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [uploadingChapterId, setUploadingChapterId] = useState(null);
-  const [viewingFileContent, setViewingFileContent] = useState(null); // { fileId, content, fileName }
+  const [viewingFileContent, setViewingFileContent] = useState(null); // { fileId, content, fileName, chapterId, startTime }
   const [loadingFileContent, setLoadingFileContent] = useState(null); // fileId being loaded
   const [deletingFileId, setDeletingFileId] = useState(null); // fileId being deleted
 
@@ -162,7 +162,9 @@ const Chapters = () => {
       setViewingFileContent({
         fileId,
         fileName: response.file_name || fileName,
-        content: response.content
+        content: response.content,
+        chapterId: chapterId,
+        startTime: Date.now() // Record when viewing started
       });
     } catch (err) {
       setError(err.response?.data?.detail || `Failed to load file content: ${err.message}`);
@@ -171,7 +173,26 @@ const Chapters = () => {
     }
   };
 
-  const closeFileContent = () => {
+  const closeFileContent = async () => {
+    if (viewingFileContent && viewingFileContent.startTime) {
+      // Calculate duration in seconds
+      const durationSeconds = Math.floor((Date.now() - viewingFileContent.startTime) / 1000);
+      
+      // Record viewing duration if it's at least 1 second
+      if (durationSeconds > 0 && viewingFileContent.chapterId) {
+        try {
+          await chapterFilesAPI.recordViewingDuration(
+            parseInt(courseId),
+            viewingFileContent.chapterId,
+            viewingFileContent.fileId,
+            durationSeconds
+          );
+        } catch (err) {
+          // Silently fail - don't show error to user for tracking
+          console.error('Failed to record viewing duration:', err);
+        }
+      }
+    }
     setViewingFileContent(null);
   };
 
@@ -595,7 +616,7 @@ const Chapters = () => {
             <button
               type="button"
               onClick={() => setShowCreateForm(true)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 cursor-pointer"
+              className="px-4 py-2 bg-[#E55A2B] text-white rounded-md hover:bg-[#E55A2B]/90 cursor-pointer"
             >
               Add Chapter
             </button>
@@ -649,7 +670,7 @@ const Chapters = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 bg-[#E55A2B] text-white rounded-md hover:bg-[#E55A2B]/90 disabled:opacity-50 cursor-pointer"
                 >
                   {submitting ? 'Creating...' : 'Add Chapter'}
                 </button>
@@ -673,8 +694,14 @@ const Chapters = () => {
 
         {/* File Content Modal */}
         {viewingFileContent && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={closeFileContent}
+          >
+            <div 
+              className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900">
                   {viewingFileContent.fileName}

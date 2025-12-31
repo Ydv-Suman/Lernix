@@ -113,6 +113,13 @@ export const chapterFilesAPI = {
     const response = await api.get(`/courses/${courseId}/chapter/${chapterId}/files/${fileId}/content`);
     return response.data;
   },
+  recordViewingDuration: async (courseId, chapterId, fileId, durationSeconds) => {
+    const response = await api.post(
+      `/courses/${courseId}/chapter/${chapterId}/files/${fileId}/record-viewing`,
+      { duration_seconds: durationSeconds }
+    );
+    return response.data;
+  },
   delete: async (courseId, chapterId, fileId) => {
     const response = await api.delete(`/courses/${courseId}/chapter/${chapterId}/files/delete/${fileId}`);
     return response.data;

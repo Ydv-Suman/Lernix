@@ -176,7 +176,7 @@ const Courses = () => {
                 <button
                   onClick={() => setViewMode('list')}
                   className={`px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === 'list'
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-[#E55A2B] text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   type="button"
@@ -186,7 +186,7 @@ const Courses = () => {
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === 'grid'
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-[#E55A2B] text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   type="button"
@@ -428,7 +428,7 @@ const Courses = () => {
             <button
               type="button"
               onClick={scrollToCreate}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 cursor-pointer"
+              className="px-4 py-2 bg-[#E55A2B] text-white rounded-md hover:bg-[#E55A2B]/90 cursor-pointer"
             >
               Add Course
             </button>
@@ -473,7 +473,7 @@ const Courses = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 bg-[#E55A2B] text-white rounded-md hover:bg-[#E55A2B]/90 disabled:opacity-50 cursor-pointer"
                 >
                   {submitting ? 'Creating...' : 'Add Course'}
                 </button>

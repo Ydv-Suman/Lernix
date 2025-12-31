@@ -56,7 +56,7 @@ def recalculate_course_time_total(db: Session, owner_id: int, course_id: int):
     ).filter(
         LearningSessions.owner_id == owner_id,
         LearningSessions.course_id == course_id,
-        LearningSessions.activity_type.in_(["summary", "ask", "ask_question", "mcq"]),
+        LearningSessions.activity_type.in_(["summary", "ask", "ask_question", "mcq", "view_content"]),
         LearningSessions.is_valid == True
     ).scalar()
     

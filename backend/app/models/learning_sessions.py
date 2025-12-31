@@ -16,7 +16,6 @@ class LearningSessions(Base):
     session_end         = Column(DateTime(timezone=True), nullable=False)
     duration_seconds    = Column(Integer, nullable=False)
     is_valid            = Column(Boolean, default=True, nullable=False)
-    ended_reason        = Column(String(50), nullable=True)
     created_at          = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at          = Column(DateTime(timezone=True), nullable=False)
 
