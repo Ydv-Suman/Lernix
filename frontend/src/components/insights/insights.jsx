@@ -28,6 +28,7 @@ const Insights = () => {
   const [summaryData, setSummaryData] = useState([]);
   const [askData, setAskData] = useState([]);
   const [mcqData, setMcqData] = useState([]);
+  const [viewContentData, setViewContentData] = useState([]);
   const [totalTimeData, setTotalTimeData] = useState([]);
   const [mcqAttempts, setMcqAttempts] = useState([]);
   const [mcqAccuracyData, setMcqAccuracyData] = useState([]);
@@ -67,7 +68,8 @@ const Insights = () => {
       setChapters(Array.isArray(chaptersData) ? chaptersData : []);
 
       // Fetch activity time data
-      const [summary, ask, mcq] = await Promise.all([
+      const [viewContent, summary, ask, mcq] = await Promise.all([
+        insightsAPI.getActivityTimeByChapter(courseId, 'view_content'),
         insightsAPI.getActivityTimeByChapter(courseId, 'summary'),
         insightsAPI.getActivityTimeByChapter(courseId, 'ask'),
         insightsAPI.getActivityTimeByChapter(courseId, 'mcq')
@@ -81,9 +83,11 @@ const Insights = () => {
         }));
       };
 
+      setViewContentData(convertToMinutes(viewContent));
       setSummaryData(convertToMinutes(summary));
       setAskData(convertToMinutes(ask));
       setMcqData(convertToMinutes(mcq));
+      
 
       // Calculate total time per chapter (convert to minutes)
       const chapterMap = new Map();
@@ -91,7 +95,7 @@ const Insights = () => {
         chapterMap.set(ch.id, { chapter_id: ch.id, chapter_name: ch.chapter_title, total: 0 });
       });
 
-      [...summary, ...ask, ...mcq].forEach(item => {
+      [...viewContent, ...summary, ...ask, ...mcq].forEach(item => {
         if (chapterMap.has(item.chapter_id)) {
           chapterMap.get(item.chapter_id).total += item.time_spent_seconds || 0;
         }
@@ -138,9 +142,11 @@ const Insights = () => {
     
     // Find chapters with no activity
     chapters.forEach(chapter => {
-      const hasActivity = summaryData.some(d => d.chapter_id === chapter.id) ||
-                         askData.some(d => d.chapter_id === chapter.id) ||
-                         mcqData.some(d => d.chapter_id === chapter.id);
+      const hasActivity = viewContentData.some(d => d.chapter_id === chapter.id) ||
+                          summaryData.some(d => d.chapter_id === chapter.id) ||
+                          askData.some(d => d.chapter_id === chapter.id) ||
+                          mcqData.some(d => d.chapter_id === chapter.id);
+                         
       
       if (!hasActivity) {
         recommendations.push({
@@ -233,8 +239,8 @@ const Insights = () => {
                 <p className="text-gray-600 mt-1">{selectedCourse.description}</p>
               </div>
 
-              {/* Three Line Graphs - Top Row */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              {/* Four Line Graphs - Top Row */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
                 {/* Summary Time Graph */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Summary Time</h3>
@@ -306,6 +312,32 @@ const Insights = () => {
                         type="monotone" 
                         dataKey="time_spent_seconds" 
                         stroke="#f59e0b" 
+                        strokeWidth={2}
+                        name="Time (minutes)"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* View Content Time Graph */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">View Content Time</h3>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart data={viewContentData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="chapter_name" 
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                        fontSize={10}
+                      />
+                      <YAxis />
+                      <Tooltip formatter={(value) => `${value} min`} />
+                      <Line 
+                        type="monotone" 
+                        dataKey="time_spent_seconds" 
+                        stroke="#ec4899" 
                         strokeWidth={2}
                         name="Time (minutes)"
                       />
