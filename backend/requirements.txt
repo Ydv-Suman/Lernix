@@ -1,12 +1,58 @@
+# FastAPI and Web Server
 fastapi
 uvicorn
+python-multipart
+
+# Database
 sqlalchemy
 psycopg2-binary
-python-dotenv
 pymysql
+
+# Authentication and Security
 bcrypt==4.0.1
 python-jose[cryptography]
-python-multipart
 passlib
+
+# Environment and Configuration
+python-dotenv
+
+# AWS S3
 boto3
+
+# PDF Processing
+pypdf
+pymupdf
 PyPDF2
+
+# Document Processing
+python-docx
+docx2txt
+
+# LangChain Core
+langchain
+langchain-community
+langchain-openai
+langchain-groq
+langchain-classic
+langchain-text-splitters
+langchain-huggingface
+langchain-experimental
+
+# Vector Stores and Retrieval
+faiss-cpu
+chromadb
+rank_bm25
+tiktoken
+sentence-transformers
+
+# Data Processing
+pandas
+openpyxl
+jq
+matplotlib
+
+# AI / ML Utilities
+wikipedia
+
+# Jupyter / Dev Tools
+ipykernel
