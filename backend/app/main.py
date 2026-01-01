@@ -25,22 +25,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def health():
-    return {"status": "ok"}
 
 # Create database tables if they do not exist
 Base.metadata.create_all(bind=engine)
 
 # Register route modules
-# app.include_router(auth.router)
-# app.include_router(users.router)
-# app.include_router(courses.router)
-# app.include_router(chapters.router)
-# app.include_router(chapter_file.router)
-# app.include_router(summarize.router)
-# app.include_router(create_mcq.router)
-# app.include_router(ask_question.router)
-# app.include_router(activity_insights.router)
-# app.include_router(total_time_insights.router)
-# app.include_router(mcq_insights.router)
+app.include_router(auth.router)
+app.include_router(users.router)
+app.include_router(courses.router)
+app.include_router(chapters.router)
+app.include_router(chapter_file.router)
+app.include_router(summarize.router)
+app.include_router(create_mcq.router)
+app.include_router(ask_question.router)
+app.include_router(activity_insights.router)
+app.include_router(total_time_insights.router)
+app.include_router(mcq_insights.router)
