@@ -66,6 +66,8 @@ MCQ attempts and performance insights
 
 Visual dashboard for learning analytics
 
+ML-based chapter recommendations (prioritized by learning status)
+
 ---
 
 ## 🧠 ML / AI Ready Architecture
@@ -120,11 +122,13 @@ API-driven architecture
 
 Jupyter Notebooks (.ipynb)
 
-Planned RAG pipeline
+RAG pipeline implementation
 
 Summarization, MCQ generation, Ask Questions
 
-Vector-store ready design
+ML-based chapter recommendations (scikit-learn)
+
+Vector-store ready design (ChromaDB, FAISS)
 
 ## 📁 Project Structure
 
@@ -143,8 +147,7 @@ Lernix/
 │   │   │   ├── chapters.py          # Chapters model
 │   │   │   ├── chapter_files.py     # ChapterFiles model
 │   │   │   ├── learning_sessions.py # LearningSessions model
-│   │   │   ├── mcq_attempt.py       # MCQAttempt model
-│   │   │   └── course_time_totals.py # CourseTimeTotals model
+│   │   │   └── mcq_attempt.py       # MCQAttempt model
 │   │   │
 │   │   ├── routes/                  # API route handlers
 │   │   │   ├── __init__.py
@@ -182,20 +185,27 @@ Lernix/
 │   │   │   │   └── total_time_insights.py    # Total time spent endpoints
 │   │   │   └── services/            # Insights service logic
 │   │   │       ├── activity_time_tracker.py  # Activity time tracking logic
-│   │   │       ├── course_time_totals_sync.py # Course time totals sync
 │   │   │       └── total_time_spent.py       # Total time calculation logic
 │   │   │
-│   │   ├── utils/                   # Utility functions
+│   │   ├── ml/                      # Machine Learning functionality
+│   │   │   ├── __init__.py
+│   │   │   ├── route/               # ML API endpoints
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── recommendation.py        # Chapter recommendation endpoint
+│   │   │   ├── service/             # ML service logic
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── recommendation_service.py # ML recommendation logic
+│   │   │   ├── ml_model/            # Trained ML models
+│   │   │   │   ├── model.pkl        # Scikit-learn model
+│   │   │   │   └── label_encoder.pkl # Label encoder
+│   │   │   └── notebook/            # Jupyter notebooks for ML experimentation
+│   │   │       └── model.ipynb      # ML model training notebook
+│   │   │
+│   │   ├── s3_config/               # AWS S3 configuration
 │   │   │   ├── __init_.py
 │   │   │   └── s3_helper.py         # AWS S3 file operations (upload, download, delete, text extraction)
-│   │   │
-│   │   └── test/                    # Test files
-│   │       ├── __init__.py
-│   │       └── test_database.py
 │   │
-│   ├── requirements.txt             # Python dependencies (FastAPI, SQLAlchemy, etc.)
-│   ├── requirement-ai.txt          # AI/ML specific dependencies
-│   └── venv/                        # Python virtual environment
+│   └── requirements.txt             # Python dependencies (FastAPI, SQLAlchemy, AI/ML libraries, etc.)
 │
 ├── frontend/                        # React frontend application
 │   ├── src/
@@ -208,6 +218,7 @@ Lernix/
 │   │   │   ├── Login.jsx            # Login page
 │   │   │   ├── Register.jsx         # Registration page
 │   │   │   ├── ProtectedRoute.jsx   # Route protection wrapper
+│   │   │   ├── About.jsx            # About page
 │   │   │   ├── course/              # Course-related components
 │   │   │   │   ├── Courses.jsx      # Course management page
 │   │   │   │   ├── chapters.jsx     # Chapter management page (with file upload/view/delete)
@@ -216,7 +227,7 @@ Lernix/
 │   │   │   │       ├── create-mcq.jsx     # MCQ generation UI
 │   │   │   │       └── ask-questions.jsx  # Q&A interface UI
 │   │   │   └── insights/            # Insights components
-│   │   │       └── insights.jsx      # Learning insights & analytics dashboard
+│   │   │       └── insights.jsx     # Learning insights & analytics dashboard (includes ML recommendations)
 │   │   │
 │   │   ├── context/                 # React context providers
 │   │   │   └── AuthContext.jsx      # Authentication context
@@ -224,8 +235,9 @@ Lernix/
 │   │   └── services/                # API service layer
 │   │       └── api.js               # Axios API client & endpoints
 │   │
-│   ├── package.json                 # Node.js dependencies
+│   ├── package.json                 # Node.js dependencies (React, Vite, Tailwind, Recharts, etc.)
 │   ├── vite.config.js              # Vite build configuration
+│   ├── eslint.config.js            # ESLint configuration
 │   └── index.html                   # HTML entry point
 │
 └── README.md                        # Project documentation

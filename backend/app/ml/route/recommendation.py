@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("/recommendation")
 def get_chapter_recommendations(
     db: db_dependency,
     user: user_dependency,

@@ -178,6 +178,12 @@ export const insightsAPI = {
       // Return empty array if endpoint doesn't exist yet
       return [];
     }
+  },
+  getRecommendations: async (courseId) => {
+    const response = await api.get('/insights/recommendation', {
+      params: { course_id: courseId }
+    });
+    return response.data;
   }
 };
 

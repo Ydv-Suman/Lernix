@@ -32,6 +32,7 @@ const Insights = () => {
   const [totalTimeData, setTotalTimeData] = useState([]);
   const [mcqAttempts, setMcqAttempts] = useState([]);
   const [mcqAccuracyData, setMcqAccuracyData] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     fetchCourses();
@@ -121,6 +122,15 @@ const Insights = () => {
       }));
 
       setMcqAccuracyData(accuracyData);
+
+      // Fetch ML recommendations
+      try {
+        const recommendationsData = await insightsAPI.getRecommendations(courseId);
+        setRecommendations(recommendationsData.recommendations || []);
+      } catch (recErr) {
+        console.error('Failed to load recommendations:', recErr);
+        setRecommendations([]);
+      }
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to load insights data');
     }
@@ -137,9 +147,6 @@ const Insights = () => {
     return `${minutes} min`;
   };
 
-  // TODO: Add ML-based recommendations when model is ready
-  // For now, keep recommendations empty until ML model is implemented
-  const recommendations = [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -149,7 +156,7 @@ const Insights = () => {
         {/* Left Sidebar - Course List */}
         <div className="w-64 bg-white border-r border-gray-200 overflow-y-auto">
           <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Courses</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Courses</h2>
           </div>
           <div className="p-2">
             {loading ? (
@@ -192,7 +199,7 @@ const Insights = () => {
           ) : (
             <>
               <div className="mb-6">
-                <h1 className="text-4xl font-bold text-gray-900">{selectedCourse.title}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{selectedCourse.title}</h1>
                 <p className="text-gray-600 mt-1">{selectedCourse.description}</p>
               </div>
 
@@ -200,7 +207,7 @@ const Insights = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
                 {/* Summary Time Graph */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Summary Time</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Summary Time</h3>
                   <ResponsiveContainer width="100%" height={200}>
                     <LineChart data={summaryData}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -226,7 +233,7 @@ const Insights = () => {
 
                 {/* Ask Questions Time Graph */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Ask Questions Time</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Ask Questions Time</h3>
                   <ResponsiveContainer width="100%" height={200}>
                     <LineChart data={askData}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -252,7 +259,7 @@ const Insights = () => {
 
                 {/* MCQ Time Graph */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">MCQ Time</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">MCQ Time</h3>
                   <ResponsiveContainer width="100%" height={200}>
                     <LineChart data={mcqData}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -278,7 +285,7 @@ const Insights = () => {
 
                 {/* View Content Time Graph */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">View Content Time</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">View Content Time</h3>
                   <ResponsiveContainer width="100%" height={200}>
                     <LineChart data={viewContentData}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -307,7 +314,7 @@ const Insights = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 {/* Total Time Summary */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Total Time Spent</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Total Time Spent</h3>
                   <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={totalTimeData}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -327,7 +334,7 @@ const Insights = () => {
 
                 {/* MCQ Accuracy Graph */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">MCQ Accuracy</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">MCQ Accuracy</h3>
                   <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={mcqAccuracyData.filter(d => d.attempts > 0)}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -348,23 +355,40 @@ const Insights = () => {
 
               {/* Recommendations Panel */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recommendations</h3>
+                <h3 className="text-3xl font-bold text-gray-900 mb-4">Recommendations</h3>
                 {recommendations && recommendations.length > 0 ? (
                   <div className="space-y-3">
-                    {recommendations.map((rec, index) => (
-                      <div
-                        key={index}
-                        className={`p-3 rounded-md border-l-4 ${
-                          rec.type === 'not_attempted'
-                            ? 'bg-blue-50 border-blue-400'
-                            : rec.type === 'needs_practice'
-                            ? 'bg-yellow-50 border-yellow-400'
-                            : 'bg-green-50 border-green-400'
-                        }`}
-                      >
-                        <p className="text-sm text-gray-800">{rec.message}</p>
-                      </div>
-                    ))}
+                    {recommendations.map((rec, index) => {
+                      // Determine color based on predicted state
+                      let bgColor = 'bg-blue-50';
+                      let borderColor = 'border-blue-400';
+                      
+                      if (rec.predicted_state === 'revise_urgent') {
+                        bgColor = 'bg-red-50';
+                        borderColor = 'border-red-400';
+                      } else if (rec.predicted_state === 'practice_more') {
+                        bgColor = 'bg-yellow-50';
+                        borderColor = 'border-yellow-400';
+                      } else if (rec.predicted_state === 'on_track') {
+                        bgColor = 'bg-blue-50';
+                        borderColor = 'border-blue-400';
+                      } else if (rec.predicted_state === 'mastered') {
+                        bgColor = 'bg-green-50';
+                        borderColor = 'border-green-400';
+                      }
+                      
+                      return (
+                        <div
+                          key={rec.chapter_id || index}
+                          className={`p-4 rounded-md border-l-4 ${bgColor} ${borderColor}`}
+                        >
+                          <p className="text-sm text-gray-800 font-medium mb-1">
+                            {rec.chapter_name}
+                          </p>
+                          <p className="text-sm text-gray-700">{rec.recommendation}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-gray-500 text-sm">No recommendations available at this time.</p>
@@ -373,7 +397,7 @@ const Insights = () => {
 
               {/* MCQ Section */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">MCQ Attempts</h3>
+                <h3 className="text-3xl font-bold text-gray-900 mb-4">MCQ Attempts</h3>
                 {mcqAttempts.length === 0 ? (
                   <p className="text-gray-500 text-sm">No MCQ attempts recorded yet.</p>
                 ) : (
