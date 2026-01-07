@@ -124,16 +124,17 @@ export const chapterFilesAPI = {
     const response = await api.delete(`/courses/${courseId}/chapter/${chapterId}/files/delete/${fileId}`);
     return response.data;
   },
-  askQuestion: async (courseId, chapterId, fileId, question) => {
+  askQuestion: async (courseId, chapterId, fileId, question, durationSeconds = 0) => {
     const response = await api.post(
       `/courses/${courseId}/chapter/${chapterId}/files/${fileId}/ask_question/`,
-      { question: question.trim() }
+      { question: question.trim(), duration_seconds: durationSeconds }
     );
     return response.data;
   },
-  summarize: async (courseId, chapterId, fileId) => {
+  summarize: async (courseId, chapterId, fileId, durationSeconds = 0) => {
     const response = await api.post(
-      `/courses/${courseId}/chapter/${chapterId}/files/${fileId}/summarize/`
+      `/courses/${courseId}/chapter/${chapterId}/files/${fileId}/summarize/`,
+      { duration_seconds: durationSeconds }
     );
     return response.data;
   },

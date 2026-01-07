@@ -1,13 +1,13 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from app.models.course_time_totals import CourseTimeTotals
+from app.models.learning_sessions import LearningSessions
 from app.models.courses import Courses
 
 
 def get_total_time_spent_by_course(db: Session, owner_id: int):
     """
-    Returns course-wise total time spent on all activities (summary, ask, mcq).
-    Uses the course_time_totals table for fast retrieval.
+    Returns course-wise total time spent on all activities (summary, ask, mcq, view_content).
+    Calculates directly from learning_sessions table.
     
     Args:
         db: Database session
@@ -21,17 +21,20 @@ def get_total_time_spent_by_course(db: Session, owner_id: int):
             Courses.id.label("course_id"),
             Courses.title.label("course_title"),
             func.coalesce(
-                CourseTimeTotals.total_time_spent_seconds, 0
+                func.sum(LearningSessions.duration_seconds), 0
             ).label("total_time_spent_seconds")
         )
         .outerjoin(
-            CourseTimeTotals,
-            (CourseTimeTotals.course_id == Courses.id) & 
-            (CourseTimeTotals.owner_id == owner_id)
+            LearningSessions,
+            (LearningSessions.course_id == Courses.id) & 
+            (LearningSessions.owner_id == owner_id) &
+            (LearningSessions.activity_type.in_(["summary", "ask", "ask_question", "mcq", "view_content"])) &
+            (LearningSessions.is_valid == True)
         )
         .filter(
             Courses.owner_id == owner_id
         )
+        .group_by(Courses.id, Courses.title)
         .order_by(Courses.id)
         .all()
     )

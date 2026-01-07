@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Path
 from typing import Annotated
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pydantic import BaseModel
 from app.s3_config.s3_helper import get_text_from_s3
 from app.rag.services.create_mcq_logic import generate_mcqs, parse_mcq_string
@@ -8,7 +8,6 @@ from app.rag.services.create_mcq_logic import generate_mcqs, parse_mcq_string
 from app.models import Chapters, LearningSessions, Users, Courses, ChapterFiles, MCQAttempt
 from app.routes.auth import db_dependency
 from app.routes.users import user_dependency
-from app.insights.services.course_time_totals_sync import update_course_time_total
 
 router = APIRouter(
     prefix='/courses/{course_id}/chapter/{chapter_id}/files/{file_id}/createMCQ',
@@ -23,18 +22,30 @@ class MCQSubmission(BaseModel):
 @router.post('/', status_code=status.HTTP_200_OK)
 def create_mcq(db:db_dependency, user:user_dependency, course_id:Annotated[int, Path(gt=0)], chapter_id:Annotated[int, Path(gt=0)], file_id:Annotated[int, Path(gt=0)]):
     if user is None:
-        raise HTTPException(status_code=402, detail="Authentication Failed")
+        raise HTTPException(status_code=401, detail="Authentication Failed")
     
-    file = db.query(ChapterFiles).filter(ChapterFiles.id == file_id, ChapterFiles.chapter_id == chapter_id, ChapterFiles.course_id == course_id, ChapterFiles.owner_id == user.get('id')).first()
+    # Verify chapter exists and belongs to user
+    chapter = db.query(Chapters).filter(
+        Chapters.id == chapter_id,
+        Chapters.course_id == course_id,
+        Chapters.owner_id == user.get('id')
+    ).first()
+    
+    if chapter is None:
+        raise HTTPException(status_code=404, detail="Chapter Not Found")
+    
+    file = db.query(ChapterFiles).filter(
+        ChapterFiles.id == file_id, 
+        ChapterFiles.chapter_id == chapter_id, 
+        ChapterFiles.course_id == course_id, 
+        ChapterFiles.owner_id == user.get('id')
+    ).first()
 
     if file is None:
-        raise HTTPException(status_code= 404, detail="file Not Found")
+        raise HTTPException(status_code=404, detail="File Not Found")
     
-    #  Get S3 key safely from DB
+    # Get S3 key safely from DB
     file_key = file.file_path
-
-     # Track time spent on mcq
-    session_start = datetime.now(timezone.utc)
 
     try:
         # 1. Get extracted text from S3
@@ -62,35 +73,7 @@ def create_mcq(db:db_dependency, user:user_dependency, course_id:Annotated[int, 
                 # Intentionally exclude correct_answer and explanation
             })
 
-        # 5. Calculate duration and record learning session
-        session_end = datetime.now(timezone.utc)
-        duration_seconds = int((session_end - session_start).total_seconds())
-
-        # Create learning session record
-        learning_session = LearningSessions(
-            owner_id=user.get('id'),
-            course_id=course_id,
-            chapter_id=chapter_id,
-            activity_type="mcq",
-            session_start=session_start,
-            session_end=session_end,
-            duration_seconds=duration_seconds,
-            is_valid=True,
-            updated_at=session_end
-        )
-        db.add(learning_session)
-        db.commit()
-        
-        # Update course time total
-        update_course_time_total(
-            db=db,
-            owner_id=user.get('id'),
-            course_id=course_id,
-            duration_seconds=duration_seconds,
-            is_add=True
-        )
-
-        # 6. Return response with questions (without answers) and store full data in session
+        # 5. Return response with questions (without answers) and store full data in session
         # Store the full questions data temporarily (in a real app, you might use Redis or session storage)
         # For now, we'll return it and the frontend will send it back on submit
         return {
@@ -99,6 +82,8 @@ def create_mcq(db:db_dependency, user:user_dependency, course_id:Annotated[int, 
             "full_questions": questions  # Include full data for submission
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -117,6 +102,16 @@ def submit_mcq(
     """Submit MCQ answers and get results with score"""
     if user is None:
         raise HTTPException(status_code=401, detail="Authentication Failed")
+    
+    # Verify chapter exists and belongs to user
+    chapter = db.query(Chapters).filter(
+        Chapters.id == chapter_id,
+        Chapters.course_id == course_id,
+        Chapters.owner_id == user.get('id')
+    ).first()
+    
+    if chapter is None:
+        raise HTTPException(status_code=404, detail="Chapter Not Found")
     
     file = db.query(ChapterFiles).filter(
         ChapterFiles.id == file_id, 
@@ -208,6 +203,25 @@ def submit_mcq(
             time_spent_seconds=submission.time_spent_seconds
         )
         db.add(mcq_attempt)
+        
+        # Record learning session for MCQ activity if time is valid
+        if submission.time_spent_seconds >= 1:
+            session_end = datetime.now(timezone.utc)
+            session_start = session_end - timedelta(seconds=submission.time_spent_seconds)
+            
+            learning_session = LearningSessions(
+                owner_id=user.get('id'),
+                course_id=course_id,
+                chapter_id=chapter_id,
+                activity_type="mcq",
+                session_start=session_start,
+                session_end=session_end,
+                duration_seconds=submission.time_spent_seconds,
+                is_valid=True,
+                updated_at=session_end
+            )
+            db.add(learning_session)
+        
         db.commit()
         
         return {
@@ -219,7 +233,10 @@ def submit_mcq(
             }
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
+        db.rollback()
         raise HTTPException(
             status_code=500,
             detail=f"Failed to submit MCQs: {str(e)}"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../../NavBar';
 import { chapterFilesAPI } from '../../../services/api';
@@ -12,10 +12,35 @@ const Summarize = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [summary, setSummary] = useState('');
+  const [startTime, setStartTime] = useState(null);
+  const startTimeRef = useRef(null);
 
   useEffect(() => {
     fetchFiles();
   }, [courseId, chapterId]);
+
+  // Cleanup effect: Record time when component unmounts or user navigates away
+  useEffect(() => {
+    startTimeRef.current = startTime;
+
+    return () => {
+      const currentStartTime = startTimeRef.current;
+      if (currentStartTime && selectedFileId && courseId && chapterId) {
+        const durationSeconds = Math.floor((Date.now() - currentStartTime) / 1000);
+        if (durationSeconds > 0) {
+          // Fire and forget - don't block navigation
+          chapterFilesAPI.summarize(
+            parseInt(courseId),
+            parseInt(chapterId),
+            selectedFileId,
+            durationSeconds
+          ).catch(err => {
+            console.error('Failed to record summary duration on cleanup:', err);
+          });
+        }
+      }
+    };
+  }, [startTime, selectedFileId, courseId, chapterId]);
 
   const fetchFiles = async () => {
     setLoading(true);
@@ -39,21 +64,32 @@ const Summarize = () => {
       return;
     }
 
+    // Start tracking time
+    const activityStartTime = Date.now();
+    setStartTime(activityStartTime);
+    startTimeRef.current = activityStartTime;
+
     setSubmitting(true);
     setError('');
     setSummary('');
 
     try {
+      // Calculate duration from when user clicked until now
+      const durationSeconds = Math.floor((Date.now() - activityStartTime) / 1000);
+      
       const response = await chapterFilesAPI.summarize(
         parseInt(courseId),
         parseInt(chapterId),
-        selectedFileId
+        selectedFileId,
+        durationSeconds
       );
       setSummary(response.summary || response);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to generate summary');
     } finally {
       setSubmitting(false);
+      setStartTime(null);
+      startTimeRef.current = null;
     }
   };
 
@@ -91,7 +127,25 @@ const Summarize = () => {
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <div>
           <button
-            onClick={() => navigate(`/courses/${courseId}/chapters`)}
+            onClick={async () => {
+              // Record time if activity was started
+              if (startTime && selectedFileId) {
+                const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
+                if (durationSeconds > 0) {
+                  try {
+                    await chapterFilesAPI.summarize(
+                      parseInt(courseId),
+                      parseInt(chapterId),
+                      selectedFileId,
+                      durationSeconds
+                    );
+                  } catch (err) {
+                    console.error('Failed to record summary duration:', err);
+                  }
+                }
+              }
+              navigate(`/courses/${courseId}/chapters`);
+            }}
             className="mb-4 text-indigo-600 hover:text-indigo-700 font-medium"
           >
             ← Back to Chapters

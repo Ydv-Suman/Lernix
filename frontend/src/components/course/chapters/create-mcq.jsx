@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../../NavBar';
 import { chapterFilesAPI } from '../../../services/api';
@@ -17,10 +17,38 @@ const CreateMcq = () => {
   const [results, setResults] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const startTimeRef = useRef(null);
 
   useEffect(() => {
     fetchFiles();
   }, [courseId, chapterId]);
+
+  // Cleanup effect: Record time when component unmounts or user navigates away
+  useEffect(() => {
+    startTimeRef.current = startTime;
+
+    return () => {
+      const currentStartTime = startTimeRef.current;
+      // If user navigates away while MCQ is active, record the time
+      if (currentStartTime && questions.length > 0 && !results && courseId && chapterId && selectedFileId) {
+        const durationSeconds = Math.floor((Date.now() - currentStartTime) / 1000);
+        if (durationSeconds > 0) {
+          // Fire and forget - don't block navigation
+          // We'll record this as MCQ time even though not submitted
+          chapterFilesAPI.submitMCQ(
+            parseInt(courseId),
+            parseInt(chapterId),
+            selectedFileId,
+            {}, // Empty answers since not submitted
+            durationSeconds,
+            fullQuestions
+          ).catch(err => {
+            console.error('Failed to record MCQ duration on cleanup:', err);
+          });
+        }
+      }
+    };
+  }, [startTime, questions, results, courseId, chapterId, selectedFileId, fullQuestions]);
 
   const fetchFiles = async () => {
     setLoading(true);
@@ -49,7 +77,9 @@ const CreateMcq = () => {
     setQuestions([]);
     setUserAnswers({});
     setResults(null);
-    setStartTime(Date.now());
+    const activityStartTime = Date.now();
+    setStartTime(activityStartTime);
+    startTimeRef.current = activityStartTime;
 
     try {
       const response = await chapterFilesAPI.createMCQ(
@@ -159,7 +189,27 @@ const CreateMcq = () => {
       <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <div>
           <button
-            onClick={() => navigate(`/courses/${courseId}/chapters`)}
+            onClick={async () => {
+              // Record time if MCQ is active
+              if (startTime && questions.length > 0 && !results && selectedFileId) {
+                const durationSeconds = Math.floor((Date.now() - startTime) / 1000);
+                if (durationSeconds > 0) {
+                  try {
+                    await chapterFilesAPI.submitMCQ(
+                      parseInt(courseId),
+                      parseInt(chapterId),
+                      selectedFileId,
+                      {}, // Empty answers since not submitted
+                      durationSeconds,
+                      fullQuestions
+                    );
+                  } catch (err) {
+                    console.error('Failed to record MCQ duration:', err);
+                  }
+                }
+              }
+              navigate(`/courses/${courseId}/chapters`);
+            }}
             className="mb-4 text-indigo-600 hover:text-indigo-700 font-medium"
           >
             ← Back to Chapters

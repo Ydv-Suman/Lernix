@@ -137,52 +137,9 @@ const Insights = () => {
     return `${minutes} min`;
   };
 
-  const generateRecommendations = () => {
-    const recommendations = [];
-    
-    // Find chapters with no activity
-    chapters.forEach(chapter => {
-      const hasActivity = viewContentData.some(d => d.chapter_id === chapter.id) ||
-                          summaryData.some(d => d.chapter_id === chapter.id) ||
-                          askData.some(d => d.chapter_id === chapter.id) ||
-                          mcqData.some(d => d.chapter_id === chapter.id);
-                         
-      
-      if (!hasActivity) {
-        recommendations.push({
-          type: 'not_attempted',
-          chapter: chapter.chapter_title,
-          message: `${chapter.chapter_title} has not been attempted yet. Start learning!`
-        });
-      }
-    });
-
-    // Find chapters with low MCQ scores
-    mcqAccuracyData.forEach(data => {
-      if (data.attempts > 0 && data.avgScore < 70) {
-        recommendations.push({
-          type: 'needs_practice',
-          chapter: data.chapter_name,
-          message: `${data.chapter_name} shows low performance (${data.avgScore}%). Consider reviewing the material.`
-        });
-      }
-    });
-
-    // Find chapters with strong mastery
-    mcqAccuracyData.forEach(data => {
-      if (data.attempts >= 2 && data.avgScore >= 90) {
-        recommendations.push({
-          type: 'strong_mastery',
-          chapter: data.chapter_name,
-          message: `${data.chapter_name} shows strong mastery (${data.avgScore}%). Great work!`
-        });
-      }
-    });
-
-    return recommendations;
-  };
-
-  const recommendations = generateRecommendations();
+  // TODO: Add ML-based recommendations when model is ready
+  // For now, keep recommendations empty until ML model is implemented
+  const recommendations = [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -205,10 +162,10 @@ const Insights = () => {
                   <li key={course.id}>
                     <button
                       onClick={() => handleCourseSelect(course)}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                         selectedCourseId === course.id
-                          ? 'bg-indigo-100 text-indigo-700'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          ? 'bg-[#FF6B35]/80 text-indigo-700'
+                          : 'text-gray-700 hover:bg-[#E55A2B]'
                       }`}
                     >
                       {course.title}
@@ -235,7 +192,7 @@ const Insights = () => {
           ) : (
             <>
               <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-900">{selectedCourse.title}</h1>
+                <h1 className="text-4xl font-bold text-gray-900">{selectedCourse.title}</h1>
                 <p className="text-gray-600 mt-1">{selectedCourse.description}</p>
               </div>
 
@@ -435,9 +392,7 @@ const Insights = () => {
               {/* Recommendations Panel */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Recommendations</h3>
-                {recommendations.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No recommendations at this time. Keep up the great work!</p>
-                ) : (
+                {recommendations && recommendations.length > 0 ? (
                   <div className="space-y-3">
                     {recommendations.map((rec, index) => (
                       <div
@@ -454,6 +409,8 @@ const Insights = () => {
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <p className="text-gray-500 text-sm">No recommendations available at this time.</p>
                 )}
               </div>
             </>

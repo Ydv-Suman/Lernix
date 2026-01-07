@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../NavBar';
 import { chaptersAPI, coursesAPI, chapterFilesAPI } from '../../services/api';
@@ -25,6 +25,7 @@ const Chapters = () => {
   const [viewingFileContent, setViewingFileContent] = useState(null); // { fileId, content, fileName, chapterId, startTime }
   const [loadingFileContent, setLoadingFileContent] = useState(null); // fileId being loaded
   const [deletingFileId, setDeletingFileId] = useState(null); // fileId being deleted
+  const viewingFileContentRef = useRef(null); // Ref to track viewing state for cleanup
 
   useEffect(() => {
     if (courseId) {
@@ -35,6 +36,34 @@ const Chapters = () => {
       setLoading(false);
     }
   }, [courseId]);
+
+  // Cleanup effect: Record time when component unmounts or user navigates away
+  useEffect(() => {
+    // Update ref whenever viewingFileContent changes
+    viewingFileContentRef.current = viewingFileContent;
+
+    // Cleanup function runs when component unmounts or before navigation
+    return () => {
+      const currentViewing = viewingFileContentRef.current;
+      if (currentViewing && currentViewing.startTime && courseId) {
+        const durationSeconds = Math.floor((Date.now() - currentViewing.startTime) / 1000);
+        
+        // Record viewing duration if it's at least 1 second
+        if (durationSeconds > 0 && currentViewing.chapterId) {
+          // Use a fire-and-forget approach for cleanup
+          chapterFilesAPI.recordViewingDuration(
+            parseInt(courseId),
+            currentViewing.chapterId,
+            currentViewing.fileId,
+            durationSeconds
+          ).catch(err => {
+            // Silently fail - don't show error to user for tracking
+            console.error('Failed to record viewing duration on cleanup:', err);
+          });
+        }
+      }
+    };
+  }, [viewingFileContent, courseId]);
 
   const fetchCourse = async () => {
     try {
@@ -174,7 +203,7 @@ const Chapters = () => {
   };
 
   const closeFileContent = async () => {
-    if (viewingFileContent && viewingFileContent.startTime) {
+    if (viewingFileContent && viewingFileContent.startTime && courseId) {
       // Calculate duration in seconds
       const durationSeconds = Math.floor((Date.now() - viewingFileContent.startTime) / 1000);
       
@@ -194,6 +223,7 @@ const Chapters = () => {
       }
     }
     setViewingFileContent(null);
+    viewingFileContentRef.current = null;
   };
 
   const handleDeleteFile = async (fileId, fileName) => {
@@ -388,12 +418,18 @@ const Chapters = () => {
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
         <header>
           <button
-            onClick={() => navigate('/courses')}
+            onClick={async () => {
+              // Record time if viewing file content before navigating
+              if (viewingFileContent) {
+                await closeFileContent();
+              }
+              navigate('/courses');
+            }}
             className="mb-4 text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-2 cursor-pointer"
           >
             ← Back to Courses
           </button>
-          <h2 className="text-3xl font-semibold text-gray-900">{course.title}</h2>
+          <h2 className="text-4xl font-semibold text-gray-900">{course.title}</h2>
           <p className="text-gray-700 mt-2">{course.description}</p>
         </header>
 
@@ -476,7 +512,7 @@ const Chapters = () => {
                         </form>
                       ) : (
                         <div>
-                          <h5 className="text-base font-semibold text-gray-900">
+                          <h5 className="text-xl font-semibold text-gray-900">
                             {chapter.chapter_title || chapter.title}
                           </h5>
                           <p className="text-gray-700 mt-1 text-sm">

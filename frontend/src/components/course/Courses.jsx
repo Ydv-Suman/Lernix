@@ -228,7 +228,7 @@ const Courses = () => {
                     <div className="flex-1">
                       <div className="flex items-start justify-between">
                         <div className="flex-1 cursor-pointer" onClick={() => handleCourseClick(course)}>
-                          <h4 className="text-lg font-semibold text-gray-900 hover:text-indigo-600 cursor-pointer">
+                          <h4 className="text-2xl font-semibold text-gray-900 hover:text-indigo-600 cursor-pointer">
                             {course.title}
                           </h4>
                           <p className="text-gray-700 mt-1 cursor-pointer">{course.description}</p>
@@ -325,7 +325,7 @@ const Courses = () => {
                 >
                   <div className="relative">
                     <div className="flex items-start justify-between mb-2">
-                      <h4 className="text-lg font-semibold text-gray-900 pr-8 hover:text-indigo-600">
+                      <h4 className="text-2xl font-semibold text-gray-900 pr-8 hover:text-indigo-600">
                         {course.title}
                       </h4>
                       <div className="relative">
