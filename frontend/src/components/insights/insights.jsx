@@ -346,8 +346,33 @@ const Insights = () => {
                 </div>
               </div>
 
-              {/* MCQ Section */}
+              {/* Recommendations Panel */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recommendations</h3>
+                {recommendations && recommendations.length > 0 ? (
+                  <div className="space-y-3">
+                    {recommendations.map((rec, index) => (
+                      <div
+                        key={index}
+                        className={`p-3 rounded-md border-l-4 ${
+                          rec.type === 'not_attempted'
+                            ? 'bg-blue-50 border-blue-400'
+                            : rec.type === 'needs_practice'
+                            ? 'bg-yellow-50 border-yellow-400'
+                            : 'bg-green-50 border-green-400'
+                        }`}
+                      >
+                        <p className="text-sm text-gray-800">{rec.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-sm">No recommendations available at this time.</p>
+                )}
+              </div>
+
+              {/* MCQ Section */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">MCQ Attempts</h3>
                 {mcqAttempts.length === 0 ? (
                   <p className="text-gray-500 text-sm">No MCQ attempts recorded yet.</p>
@@ -386,31 +411,6 @@ const Insights = () => {
                       </tbody>
                     </table>
                   </div>
-                )}
-              </div>
-
-              {/* Recommendations Panel */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recommendations</h3>
-                {recommendations && recommendations.length > 0 ? (
-                  <div className="space-y-3">
-                    {recommendations.map((rec, index) => (
-                      <div
-                        key={index}
-                        className={`p-3 rounded-md border-l-4 ${
-                          rec.type === 'not_attempted'
-                            ? 'bg-blue-50 border-blue-400'
-                            : rec.type === 'needs_practice'
-                            ? 'bg-yellow-50 border-yellow-400'
-                            : 'bg-green-50 border-green-400'
-                        }`}
-                      >
-                        <p className="text-sm text-gray-800">{rec.message}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm">No recommendations available at this time.</p>
                 )}
               </div>
             </>

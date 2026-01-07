@@ -8,14 +8,16 @@ from app.database import engine
 from app.routes import auth, users, courses, chapters, chapter_file
 from app.rag.routes import summarize, create_mcq, ask_question
 from app.insights.routes import activity_insights, total_time_insights, mcq_insights
-
+from app.ml.route import recommendation
+import os
+from dotenv import load_dotenv
 
 app = FastAPI()
 
 # Configure CORS for the frontend origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=os.getenv("CORS_ORIGINS"),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,3 +38,4 @@ app.include_router(ask_question.router)
 app.include_router(activity_insights.router)
 app.include_router(total_time_insights.router)
 app.include_router(mcq_insights.router)
+app.include_router(recommendation.router)

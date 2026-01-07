@@ -10,3 +10,35 @@ python-multipart
 passlib
 boto3
 PyPDF2
+joblib
+
+# ml
+scikit-learn
+
+# for ai
+ipykernel
+langchain
+faiss-cpu
+tiktoken
+langchain-community
+langchain-openai
+chromadb
+
+pypdf
+python-dotenv
+langchain-text-splitters
+pymupdf
+python-docx
+docx2txt
+pandas
+openpyxl
+jq
+matplotlib
+
+
+## Embedding
+langchain-huggingface
+sentence-transformers
+langchain-experimental
+rank_bm25
+wikipedia
