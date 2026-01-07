@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Path
 from typing import Annotated
 from datetime import datetime, timezone
 from pydantic import BaseModel
-from app.utils.s3_helper import get_text_from_s3
+from app.s3_config.s3_helper import get_text_from_s3
 from app.rag.services.create_mcq_logic import generate_mcqs, parse_mcq_string
 
 from app.models import Chapters, LearningSessions, Users, Courses, ChapterFiles, MCQAttempt

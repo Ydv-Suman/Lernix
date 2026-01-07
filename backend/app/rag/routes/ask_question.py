@@ -2,7 +2,7 @@ from fastapi import APIRouter, status, HTTPException, Path
 from typing import Annotated
 from datetime import datetime, timezone
 from pydantic import BaseModel
-from app.utils.s3_helper import get_text_from_s3
+from app.s3_config.s3_helper import get_text_from_s3
 from app.rag.services.ask_question_logic import ask_question
 
 from app.models import LearningSessions, Users, Courses, Chapters , ChapterFiles

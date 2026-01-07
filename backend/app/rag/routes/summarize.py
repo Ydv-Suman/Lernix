@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Path
 from typing import Annotated
 from datetime import datetime, timezone
-from app.utils.s3_helper import get_text_from_s3
+from app.s3_config.s3_helper import get_text_from_s3
 from app.rag.services.summarizer_logic import summarize_text
 
 from app.models import Chapters, Users, Courses, ChapterFiles, LearningSessions
