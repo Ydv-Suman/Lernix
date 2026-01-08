@@ -140,106 +140,106 @@ Lernix/
 │   │   ├── main.py                  # FastAPI app entry point & router registration
 │   │   ├── database.py              # SQLAlchemy database configuration
 │   │   │
-│   │   ├── models/                  # SQLAlchemy ORM models (one file per model)
-│   │   │   ├── __init__.py          # Exports all models
-│   │   │   ├── users.py             # Users model
-│   │   │   ├── courses.py           # Courses model
-│   │   │   ├── chapters.py          # Chapters model
-│   │   │   ├── chapter_files.py     # ChapterFiles model
-│   │   │   ├── learning_sessions.py # LearningSessions model
-│   │   │   └── mcq_attempt.py       # MCQAttempt model
+│   │   ├── models/                  # SQLAlchemy ORM models
+│   │   │   ├── __init__.py
+│   │   │   ├── users.py
+│   │   │   ├── courses.py
+│   │   │   ├── chapters.py
+│   │   │   ├── chapter_files.py
+│   │   │   ├── learning_sessions.py
+│   │   │   └── mcq_attempt.py
 │   │   │
 │   │   ├── routes/                  # API route handlers
 │   │   │   ├── __init__.py
-│   │   │   ├── auth.py              # Authentication endpoints (login, register, JWT)
-│   │   │   ├── users.py             # User management endpoints
-│   │   │   ├── courses.py           # Course CRUD operations
-│   │   │   ├── chapters.py          # Chapter CRUD operations
-│   │   │   └── chapter_file.py      # File upload/view content/delete endpoints
+│   │   │   ├── auth.py              # Authentication endpoints
+│   │   │   ├── users.py             # User management
+│   │   │   ├── courses.py           # Course CRUD
+│   │   │   ├── chapters.py          # Chapter CRUD
+│   │   │   └── chapter_file.py      # File operations
 │   │   │
-│   │   ├── rag/                     # RAG/AI/ML functionality
+│   │   ├── rag/                     # RAG/AI functionality
 │   │   │   ├── routes/              # RAG API endpoints
-│   │   │   │   ├── __init_.py       # Note: actual filename (typo in codebase)
-│   │   │   │   ├── summarize.py     # Summary generation endpoint
-│   │   │   │   ├── create_mcq.py    # MCQ generation endpoint
-│   │   │   │   └── ask_question.py  # Q&A endpoint
-│   │   │   │
+│   │   │   │   ├── __init_.py
+│   │   │   │   ├── summarize.py
+│   │   │   │   ├── create_mcq.py
+│   │   │   │   └── ask_question.py
 │   │   │   ├── services/            # RAG service logic
-│   │   │   │   ├── summarizer_logic.py      # Summary generation logic
-│   │   │   │   ├── create_mcq_logic.py      # MCQ generation logic
-│   │   │   │   ├── ask_question_logic.py    # Q&A RAG logic
-│   │   │   │   └── document_processing.py   # Document text extraction
-│   │   │   │
-│   │   │   └── notebook/            # Jupyter notebooks for AI experimentation
+│   │   │   │   ├── summarizer_logic.py
+│   │   │   │   ├── create_mcq_logic.py
+│   │   │   │   ├── ask_question_logic.py
+│   │   │   │   └── document_processing.py
+│   │   │   └── notebook/            # Jupyter notebooks
 │   │   │       ├── summarizer.ipynb
 │   │   │       ├── create_mcq.ipynb
 │   │   │       ├── ask_question.ipynb
-│   │   │       └── data/            # Sample documents for testing
-│   │   │           └── Interpersonal_Communication_with_Strangers.pdf
+│   │   │       └── data/
 │   │   │
 │   │   ├── insights/                # Learning insights & analytics
 │   │   │   ├── __init__.py
 │   │   │   ├── routes/              # Insights API endpoints
-│   │   │   │   ├── activity_insights.py      # Activity time tracking endpoints
-│   │   │   │   ├── mcq_insights.py           # MCQ attempts insights endpoints
-│   │   │   │   └── total_time_insights.py    # Total time spent endpoints
+│   │   │   │   ├── activity_insights.py
+│   │   │   │   ├── mcq_insights.py
+│   │   │   │   └── total_time_insights.py
 │   │   │   └── services/            # Insights service logic
-│   │   │       ├── activity_time_tracker.py  # Activity time tracking logic
-│   │   │       └── total_time_spent.py       # Total time calculation logic
+│   │   │       ├── activity_time_tracker.py
+│   │   │       └── total_time_spent.py
 │   │   │
 │   │   ├── ml/                      # Machine Learning functionality
 │   │   │   ├── __init__.py
 │   │   │   ├── route/               # ML API endpoints
 │   │   │   │   ├── __init__.py
-│   │   │   │   └── recommendation.py        # Chapter recommendation endpoint
+│   │   │   │   └── recommendation.py
 │   │   │   ├── service/             # ML service logic
 │   │   │   │   ├── __init__.py
-│   │   │   │   └── recommendation_service.py # ML recommendation logic
+│   │   │   │   └── recommendation_service.py
 │   │   │   ├── ml_model/            # Trained ML models
-│   │   │   │   ├── model.pkl        # Scikit-learn model
-│   │   │   │   └── label_encoder.pkl # Label encoder
-│   │   │   └── notebook/            # Jupyter notebooks for ML experimentation
-│   │   │       └── model.ipynb      # ML model training notebook
+│   │   │   │   ├── model.pkl
+│   │   │   │   └── label_encoder.pkl
+│   │   │   └── notebook/
+│   │   │       └── model.ipynb
 │   │   │
-│   │   ├── s3_config/               # AWS S3 configuration
-│   │   │   ├── __init_.py
-│   │   │   └── s3_helper.py         # AWS S3 file operations (upload, download, delete, text extraction)
+│   │   └── s3_config/               # AWS S3 configuration
+│   │       ├── __init_.py
+│   │       └── s3_helper.py
 │   │
-│   └── requirements.txt             # Python dependencies (FastAPI, SQLAlchemy, AI/ML libraries, etc.)
+│   ├── Dockerfile                   # Backend Docker configuration
+│   └── requirements.txt             # Python dependencies
 │
 ├── frontend/                        # React frontend application
 │   ├── src/
 │   │   ├── main.jsx                 # React app entry point
 │   │   ├── App.jsx                  # Main app component & routing
-│   │   ├── App.css                  # Global styles
+│   │   ├── App.css
 │   │   │
 │   │   ├── components/              # React components
-│   │   │   ├── NavBar.jsx           # Navigation bar component
-│   │   │   ├── Login.jsx            # Login page
-│   │   │   ├── Register.jsx         # Registration page
-│   │   │   ├── ProtectedRoute.jsx   # Route protection wrapper
-│   │   │   ├── About.jsx            # About page
-│   │   │   ├── course/              # Course-related components
-│   │   │   │   ├── Courses.jsx      # Course management page
-│   │   │   │   ├── chapters.jsx     # Chapter management page (with file upload/view/delete)
-│   │   │   │   └── chapters/        # Chapter feature components
-│   │   │   │       ├── Summarize.jsx      # AI summary generation UI
-│   │   │   │       ├── create-mcq.jsx     # MCQ generation UI
-│   │   │   │       └── ask-questions.jsx  # Q&A interface UI
-│   │   │   └── insights/            # Insights components
-│   │   │       └── insights.jsx     # Learning insights & analytics dashboard (includes ML recommendations)
+│   │   │   ├── NavBar.jsx
+│   │   │   ├── Login.jsx
+│   │   │   ├── Register.jsx
+│   │   │   ├── ProtectedRoute.jsx
+│   │   │   ├── About.jsx
+│   │   │   ├── course/
+│   │   │   │   ├── Courses.jsx
+│   │   │   │   ├── chapters.jsx
+│   │   │   │   └── chapters/
+│   │   │   │       ├── Summarize.jsx
+│   │   │   │       ├── create-mcq.jsx
+│   │   │   │       └── ask-questions.jsx
+│   │   │   └── insights/
+│   │   │       └── insights.jsx
 │   │   │
-│   │   ├── context/                 # React context providers
-│   │   │   └── AuthContext.jsx      # Authentication context
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx
 │   │   │
-│   │   └── services/                # API service layer
-│   │       └── api.js               # Axios API client & endpoints
+│   │   └── services/
+│   │       └── api.js
 │   │
-│   ├── package.json                 # Node.js dependencies (React, Vite, Tailwind, Recharts, etc.)
-│   ├── vite.config.js              # Vite build configuration
-│   ├── eslint.config.js            # ESLint configuration
-│   └── index.html                   # HTML entry point
+│   ├── Dockerfile                   # Frontend Docker configuration
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── eslint.config.js
+│   └── index.html
 │
+├── docker-compose.yaml              # Docker Compose configuration
 └── README.md                        # Project documentation
 ```
 
@@ -253,3 +253,52 @@ User
              ├── Stored in AWS S3
              └── Metadata in PostgreSQL
 ```
+
+## 🐳 Running with Docker
+
+### Quick Start (Using Pre-built Images)
+
+The easiest way to run Lernix is using the pre-built Docker images from Docker Hub.
+
+#### Step 1: Run Backend
+
+Open a terminal and run:
+
+```bash
+# Pull the backend image
+docker pull sumanydv/lernix-backend
+
+# Run the backend container
+docker run -p 8000:8000 sumanydv/lernix-backend
+```
+
+The backend API will be available at: **http://localhost:8000**
+
+#### Step 2: Run Frontend
+
+Open a **new terminal** and run:
+
+```bash
+# Pull the frontend image
+docker pull sumanydv/lernix-frontend
+
+# Run the frontend container
+docker run -p 5173:5173 sumanydv/lernix-frontend
+```
+
+The frontend application will be available at: **http://localhost:5173**
+
+### Access the Application
+
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
+
+### Demo Credentials
+
+You can use the following demo account to test the application:
+
+- **Email**: `suman@gmail.com`
+- **Password**: `suman123`
+
+Or create your own account by registering through the application.
