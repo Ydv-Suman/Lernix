@@ -14,6 +14,7 @@ joblib
 
 # ml
 scikit-learn
+scipy
 
 # for ai
 ipykernel
@@ -37,6 +38,8 @@ matplotlib
 
 
 ## Embedding
+torch
+transformers
 langchain-huggingface
 sentence-transformers
 langchain-experimental
