@@ -15,9 +15,12 @@ from dotenv import load_dotenv
 app = FastAPI()
 
 # Configure CORS for the frontend origins
+origins = os.getenv("CORS_ORIGINS", "")
+origins = [o.strip() for o in origins.split(",") if o]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ORIGINS"),
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
