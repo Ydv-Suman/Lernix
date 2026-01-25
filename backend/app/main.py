@@ -29,6 +29,10 @@ app.add_middleware(
 # Create database tables if they do not exist
 Base.metadata.create_all(bind=engine)
 
+
+@app.get("/")
+def health():
+    return {"status": "ok"}
 # Register route modules
 app.include_router(auth.router)
 app.include_router(users.router)
