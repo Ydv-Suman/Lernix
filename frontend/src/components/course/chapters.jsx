@@ -438,6 +438,13 @@ const Chapters = () => {
             <h3 className="text-xl font-semibold text-gray-900">Chapters</h3>
             <div className="flex items-center gap-3">
               <button
+                type="button"
+                onClick={() => setShowCreateForm((prev) => !prev)}
+                className="px-4 py-2 bg-[#E55A2B] text-white rounded-md hover:bg-[#E55A2B]/90 cursor-pointer"
+              >
+                {showCreateForm ? 'Hide Add Chapter' : 'Add Chapter'}
+              </button>
+              <button
                 onClick={fetchChapters}
                 className="text-sm text-indigo-600 hover:text-indigo-700 font-medium cursor-pointer"
                 type="button"
@@ -459,10 +466,66 @@ const Chapters = () => {
             </div>
           )}
 
+          {showCreateForm && (
+            <section className="bg-white shadow-sm rounded-lg border border-gray-200 p-6 mb-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Create a Chapter</h3>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="Chapter title"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="Brief description"
+                    rows="3"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="px-4 py-2 bg-[#E55A2B] text-white rounded-md hover:bg-[#E55A2B]/90 disabled:opacity-50 cursor-pointer"
+                  >
+                    {submitting ? 'Creating...' : 'Add Chapter'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateForm(false);
+                      setFormData({ title: '', description: '' });
+                      setError('');
+                      setSuccess('');
+                    }}
+                    className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </section>
+          )}
+
           {loading ? (
             <p className="text-gray-700">Loading chapters...</p>
           ) : chapters.length === 0 ? (
-            <p className="text-gray-600">No chapters yet. Add your first one below.</p>
+            <p className="text-gray-600">No chapters yet. Add your first one above.</p>
           ) : (
             <div className="divide-y divide-gray-200">
               {chapters.map((chapter) => (
@@ -646,87 +709,7 @@ const Chapters = () => {
               ))}
             </div>
           )}
-
-          {/* Add Chapter Button */}
-          <div className="pt-6 flex justify-center">
-            <button
-              type="button"
-              onClick={() => setShowCreateForm(true)}
-              className="px-4 py-2 bg-[#E55A2B] text-white rounded-md hover:bg-[#E55A2B]/90 cursor-pointer"
-            >
-              Add Chapter
-            </button>
-          </div>
         </section>
-
-        {showCreateForm && (
-          <section className="bg-white shadow-sm rounded-lg border border-gray-200 p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Create a Chapter</h3>
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-200 rounded-md">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="mb-4 p-3 bg-green-100 text-green-800 border border-green-200 rounded-md">
-                {success}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="Chapter title"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  placeholder="Brief description"
-                  rows="3"
-                  required
-                />
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 bg-[#E55A2B] text-white rounded-md hover:bg-[#E55A2B]/90 disabled:opacity-50 cursor-pointer"
-                >
-                  {submitting ? 'Creating...' : 'Add Chapter'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateForm(false);
-                    setFormData({ title: '', description: '' });
-                    setError('');
-                    setSuccess('');
-                  }}
-                  className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </section>
-        )}
 
         {/* File Content Modal */}
         {viewingFileContent && (
