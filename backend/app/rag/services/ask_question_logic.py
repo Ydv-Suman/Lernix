@@ -1,19 +1,20 @@
 from app.rag.services.document_processing import *
 
 def ask_question_rag_chain(retriever):
-    prompt_text = """
-    Answer the question based on the following context:
-    
-    Context:{context}
-    
-    Question:{input}
-    """
+    prompt_text = """You are a helpful learning assistant. Answer the question accurately based ONLY on the provided context. If the context does not contain enough information to answer, say so clearly rather than guessing.
+
+Context:
+{context}
+
+Question: {input}
+
+Provide a clear, well-structured answer. Use examples from the context where relevant."""
 
     prompt = PromptTemplate.from_template(prompt_text)
     
     llm = ChatOpenAI(
         model="gpt-4o-mini",
-        temperature=0.7
+        temperature=0.3
     )
 
     document_chain = create_stuff_documents_chain(

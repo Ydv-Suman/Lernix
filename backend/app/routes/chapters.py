@@ -101,7 +101,7 @@ def add_chapter_to_course(db: db_dependency,  user: user_dependency,  course_id:
         }
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to add chapter to course: {str(e)}" )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to add chapter to course")
 
 
 
@@ -134,7 +134,7 @@ def update_chapter(db:db_dependency, user:user_dependency, course_id: Annotated[
         return {"message": "Chapter updated successfully", "chapter_id": chapter.id, "title": chapter.chapter_title}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to update chapter: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to update chapter")
 
 
 @router.delete('/deleteChapter/{chapter_id}', status_code=status.HTTP_204_NO_CONTENT)

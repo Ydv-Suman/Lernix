@@ -3,10 +3,15 @@ from app.rag.services.document_processing import *
 # 4. Build RAG Chain
 def build_rag_chain(retriever):
     prompt = PromptTemplate.from_template(
-        """Summarize the following content clearly and concisely:
+        """You are a learning assistant. Provide a comprehensive yet concise summary of the following educational content. Structure the summary with:
+1. Key concepts and definitions
+2. Main points and arguments
+3. Important details and examples
 
-        {context}
-        """
+Content:
+{context}
+
+Summary:"""
     )
 
     llm = ChatOpenAI(

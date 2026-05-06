@@ -20,10 +20,10 @@ if openai_api_key is None:
 os.environ["OPENAI_API_KEY"] = openai_api_key
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-# 1. Chunk text
-def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]:
+# 1. Chunk text — larger chunks with more overlap for better context retention
+def chunk_text(text: str, chunk_size: int = 800, overlap: int = 150) -> List[str]:
     splitter = RecursiveCharacterTextSplitter(
-        separators=["\n\n", "\n", " ", ""],
+        separators=["\n\n", "\n", ". ", " ", ""],
         chunk_size=chunk_size,
         chunk_overlap=overlap,
         length_function=len
@@ -31,9 +31,12 @@ def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]
     return splitter.split_text(text)
 
 
-# 2. Convert chunks to Documents
+# 2. Convert chunks to Documents with position metadata for better retrieval
 def convert_to_document(chunks: List[str]) -> List[Document]:
-    return [Document(page_content=chunk) for chunk in chunks]
+    return [
+        Document(page_content=chunk, metadata={"chunk_index": i, "total_chunks": len(chunks)})
+        for i, chunk in enumerate(chunks)
+    ]
 
 
 # 3. Create Hybrid Retriever
@@ -41,10 +44,10 @@ def create_retriever(docs: List[Document]):
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
     dense_vectorstore = FAISS.from_documents(docs, embeddings)
-    dense_retriever = dense_vectorstore.as_retriever(search_kwargs={"k": 10})
+    dense_retriever = dense_vectorstore.as_retriever(search_kwargs={"k": 6})
 
     sparse_retriever = BM25Retriever.from_documents(docs)
-    sparse_retriever.k = 3
+    sparse_retriever.k = 4
 
     return EnsembleRetriever(
         retrievers=[dense_retriever, sparse_retriever],

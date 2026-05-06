@@ -31,7 +31,7 @@ def create_course(user:user_dependency, db:db_dependency, add_course:CreateCours
         raise HTTPException(status_code=401, detail="Authentication Failed")
     
     # Check if course title already exists
-    existing_course = db.query(Courses).filter(Courses.title == add_course.title).first()
+    existing_course = db.query(Courses).filter(Courses.title == add_course.title, Courses.owner_id == user.get('id')).first()
     if existing_course:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -52,7 +52,7 @@ def create_course(user:user_dependency, db:db_dependency, add_course:CreateCours
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to create new course: {str(e)}"
+            detail="Failed to create new course"
         )
 
 
@@ -72,7 +72,7 @@ def update_course(db:db_dependency, user:user_dependency, course_update:CreateCo
         return {"message": "Course updated successfully", "course_id": course.id, "title": course.title}
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to edit course: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to edit course")
 
 
 @router.delete('/deleteCourse/{course_id}', status_code=status.HTTP_204_NO_CONTENT)

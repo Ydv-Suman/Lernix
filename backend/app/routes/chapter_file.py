@@ -4,6 +4,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from datetime import datetime, timezone, timedelta
 import io
+import re
+import os as _os
 
 from app.models import Chapters, Users, Courses, ChapterFiles, LearningSessions
 from .auth import db_dependency
@@ -78,9 +80,13 @@ async def upload_file(user:user_dependency, db:db_dependency, course_id: Annotat
             detail=f"File size exceeds maximum allowed size of {MAX_FILE_SIZE / (1024 * 1024)}MB"
         )
     
-    # Generate unique filename
+    # Sanitize filename to prevent path traversal
+    raw_name = _os.path.basename(file.filename or "upload")
+    sanitized_name = re.sub(r'[^\w\-.]', '_', raw_name)
+    if not sanitized_name or sanitized_name.startswith('.'):
+        sanitized_name = "upload_" + sanitized_name
     file_extension = ALLOWED_MIME_TYPES[file.content_type]
-    unique_filename = f"{file.filename}"
+    unique_filename = sanitized_name
     
     try:
         # Upload to S3
@@ -118,7 +124,7 @@ async def upload_file(user:user_dependency, db:db_dependency, course_id: Annotat
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to upload file: {str(e)}"
+            detail="Failed to upload file"
         )
 
 
@@ -150,7 +156,7 @@ def get_file_content(user:user_dependency, db:db_dependency, course_id: Annotate
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to retrieve file content: {str(e)}"
+            detail="Failed to retrieve file content"
         )
 
 
@@ -228,7 +234,7 @@ def record_viewing_duration(
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to record viewing duration: {str(e)}"
+            detail="Failed to record viewing duration"
         )
 
 
@@ -258,5 +264,5 @@ def delete_file_by_id(db:db_dependency, user:user_dependency, course_id:Annotate
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to delete file: {str(e)}"
+            detail="Failed to delete file"
         )

@@ -43,7 +43,7 @@ def upload_file_to_s3(file_content: bytes, file_name: str, folder: str = "chapte
         return file_key
     
     except ClientError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to upload file to S3: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to upload file to S3")
 
 
 def delete_file_from_s3(file_key: str) -> bool:
@@ -57,7 +57,7 @@ def delete_file_from_s3(file_key: str) -> bool:
         )
         return True
     except ClientError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to delete file from S3: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete file from S3")
 
 
 def get_file_from_s3(file_key: str):
@@ -71,7 +71,7 @@ def get_file_from_s3(file_key: str):
         )
         return response['Body'].read()
     except ClientError as e:
-        raise HTTPException(status_code=404, detail=f"File not found in S3: {str(e)}")
+        raise HTTPException(status_code=404, detail="File not found in S3")
     
 
 # RAG support

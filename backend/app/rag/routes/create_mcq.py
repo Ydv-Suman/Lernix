@@ -1,26 +1,35 @@
-from fastapi import APIRouter, HTTPException, status, Path
-from typing import Annotated
+from fastapi import APIRouter, HTTPException, status, Path, Request
+from typing import Annotated, Dict
 from datetime import datetime, timezone, timedelta
 from pydantic import BaseModel
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from app.s3_config.s3_helper import get_text_from_s3
 from app.rag.services.create_mcq_logic import generate_mcqs, parse_mcq_string
 
 from app.models import Chapters, LearningSessions, Users, Courses, ChapterFiles, MCQAttempt
 from app.routes.auth import db_dependency
 from app.routes.users import user_dependency
+import hashlib, json
+
+limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(
     prefix='/courses/{course_id}/chapter/{chapter_id}/files/{file_id}/createMCQ',
     tags=["RAG"]
 )
 
+# Server-side store for MCQ sessions (in production use Redis/DB)
+_mcq_sessions: Dict[str, list] = {}
+
 class MCQSubmission(BaseModel):
     answers: dict  # {question_number: selected_option} e.g., {1: "A", 2: "B"}
     time_spent_seconds: int = 0
-    full_questions: list = None  # Optional: full questions data from initial response
+    session_key: str = ""  # Key to retrieve server-stored questions
 
 @router.post('/', status_code=status.HTTP_200_OK)
-def create_mcq(db:db_dependency, user:user_dependency, course_id:Annotated[int, Path(gt=0)], chapter_id:Annotated[int, Path(gt=0)], file_id:Annotated[int, Path(gt=0)]):
+@limiter.limit("10/minute")
+def create_mcq(request: Request, db:db_dependency, user:user_dependency, course_id:Annotated[int, Path(gt=0)], chapter_id:Annotated[int, Path(gt=0)], file_id:Annotated[int, Path(gt=0)]):
     if user is None:
         raise HTTPException(status_code=401, detail="Authentication Failed")
     
@@ -73,13 +82,16 @@ def create_mcq(db:db_dependency, user:user_dependency, course_id:Annotated[int, 
                 # Intentionally exclude correct_answer and explanation
             })
 
-        # 5. Return response with questions (without answers) and store full data in session
-        # Store the full questions data temporarily (in a real app, you might use Redis or session storage)
-        # For now, we'll return it and the frontend will send it back on submit
+        # 5. Store full questions server-side (keyed by user+file+timestamp)
+        session_key = hashlib.sha256(
+            f"{user.get('id')}:{file_id}:{datetime.now(timezone.utc).isoformat()}".encode()
+        ).hexdigest()[:16]
+        _mcq_sessions[session_key] = questions
+
         return {
             "file_key": file_key,
             "questions": questions_for_quiz,
-            "full_questions": questions  # Include full data for submission
+            "session_key": session_key  # Client sends this back on submit
         }
 
     except HTTPException:
@@ -87,7 +99,7 @@ def create_mcq(db:db_dependency, user:user_dependency, course_id:Annotated[int, 
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to generate MCQs: {str(e)}"
+            detail="Failed to generate MCQs"
         )
 
 @router.post('/submit', status_code=status.HTTP_200_OK)
@@ -99,7 +111,7 @@ def submit_mcq(
     file_id: Annotated[int, Path(gt=0)],
     submission: MCQSubmission
 ):
-    """Submit MCQ answers and get results with score"""
+    """Submit MCQ answers and get results with score. Rate limited to prevent abuse."""
     if user is None:
         raise HTTPException(status_code=401, detail="Authentication Failed")
     
@@ -124,15 +136,13 @@ def submit_mcq(
         raise HTTPException(status_code=404, detail="File Not Found")
     
     try:
-        # Use provided full_questions if available, otherwise regenerate
-        if submission.full_questions and len(submission.full_questions) > 0:
-            full_questions = submission.full_questions
-        else:
-            # Fallback: regenerate MCQs (not ideal but works)
-            file_key = file.file_path
-            text = get_text_from_s3(file_key)
-            mcq_string = generate_mcqs(text)
-            full_questions = parse_mcq_string(mcq_string)
+        # Retrieve server-stored questions using session key
+        full_questions = _mcq_sessions.pop(submission.session_key, None)
+        if not full_questions:
+            raise HTTPException(
+                status_code=400,
+                detail="MCQ session expired or invalid. Please generate new questions."
+            )
         
         # Evaluate answers
         total_questions = len(full_questions)
@@ -239,5 +249,5 @@ def submit_mcq(
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to submit MCQs: {str(e)}"
+            detail="Failed to submit MCQs"
         )

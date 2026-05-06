@@ -1,13 +1,17 @@
-from fastapi import APIRouter, HTTPException, status, Path, Body
+from fastapi import APIRouter, HTTPException, status, Path, Body, Request
 from typing import Annotated
 from datetime import datetime, timezone, timedelta
 from pydantic import BaseModel
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from app.s3_config.s3_helper import get_text_from_s3
 from app.rag.services.summarizer_logic import summarize_text
 
 from app.models import Chapters, Users, Courses, ChapterFiles, LearningSessions
 from app.routes.auth import db_dependency
 from app.routes.users import user_dependency
+
+limiter = Limiter(key_func=get_remote_address)
 
 
 router = APIRouter(
@@ -20,13 +24,15 @@ class SummarizeRequest(BaseModel):
 
 
 @router.post("/", status_code=status.HTTP_200_OK)
+@limiter.limit("10/minute")
 def summarize_uploaded_file(
-    user: user_dependency, 
-    db: db_dependency, 
-    course_id: Annotated[int, Path(gt=0)], 
-    chapter_id: Annotated[int, Path(gt=0)], 
+    request: Request,
+    user: user_dependency,
+    db: db_dependency,
+    course_id: Annotated[int, Path(gt=0)],
+    chapter_id: Annotated[int, Path(gt=0)],
     file_id: Annotated[int, Path(gt=0)],
-    request: SummarizeRequest = Body(default=SummarizeRequest(duration_seconds=0))
+    summarize_data: SummarizeRequest = Body(default=SummarizeRequest(duration_seconds=0))
 ):
     """ Summarize a document stored in S3 using RAG """
 
@@ -70,9 +76,9 @@ def summarize_uploaded_file(
         summary = summarize_text(text)
 
         # 3. Record learning session if duration is provided and valid
-        if request.duration_seconds >= 1:
+        if summarize_data.duration_seconds >= 1:
             session_end = datetime.now(timezone.utc)
-            session_start = session_end - timedelta(seconds=request.duration_seconds)
+            session_start = session_end - timedelta(seconds=summarize_data.duration_seconds)
             
             learning_session = LearningSessions(
                 owner_id=user.get('id'),
@@ -81,7 +87,7 @@ def summarize_uploaded_file(
                 activity_type="summary",
                 session_start=session_start,
                 session_end=session_end,
-                duration_seconds=request.duration_seconds,
+                duration_seconds=summarize_data.duration_seconds,
                 is_valid=True,
                 updated_at=session_end
             )
@@ -100,5 +106,5 @@ def summarize_uploaded_file(
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to summarize document: {str(e)}"
+            detail="Failed to summarize document"
         )

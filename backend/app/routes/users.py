@@ -47,7 +47,7 @@ def get_users(db: db_dependency, user:user_dependency):
 
 
 ## delete the use
-@router.delete('/deleteuser/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/deleteuser', status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(db: db_dependency, user:user_dependency):
     if user is None:
         raise HTTPException(status_code=401, detail="Authentication Failed")

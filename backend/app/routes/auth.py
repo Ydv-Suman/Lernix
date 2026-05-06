@@ -1,12 +1,14 @@
 from datetime import timedelta, timezone
 import datetime
 from typing import Annotated, Optional, cast
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 import os
 from dotenv import load_dotenv
@@ -18,6 +20,8 @@ router = APIRouter(
     prefix="/auth",
     tags=["auth"]
 )
+
+limiter = Limiter(key_func=get_remote_address)
 
 load_dotenv()
 
@@ -46,6 +50,23 @@ class CreateUserRequest(BaseModel):
     phone_number: str
     password: str
 
+    @staticmethod
+    def _validate_email(v: str) -> str:
+        import re
+        if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', v):
+            raise ValueError('Invalid email format')
+        return v
+
+    @staticmethod
+    def _validate_password(v: str) -> str:
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters')
+        if not any(c.isupper() for c in v):
+            raise ValueError('Password must contain an uppercase letter')
+        if not any(c.isdigit() for c in v):
+            raise ValueError('Password must contain a digit')
+        return v
+
 
 class Token(BaseModel):
     access_token:str
@@ -64,8 +85,16 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 # create new Users
 @router.post("/create", status_code=status.HTTP_201_CREATED)
-def create_new_user(create_user_request: CreateUserRequest, db: db_dependency):
+@limiter.limit("3/minute")
+def create_new_user(request: Request, create_user_request: CreateUserRequest, db: db_dependency):
     """Register a new user ensuring unique email and username."""
+    # Validate email and password
+    try:
+        CreateUserRequest._validate_email(create_user_request.email)
+        CreateUserRequest._validate_password(create_user_request.password)
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+
     # Check if email already exists
     existing_user = db.query(Users).filter(Users.email == create_user_request.email).first()
     if existing_user:
@@ -142,7 +171,8 @@ async def get_current_user(token: Annotated[str, Depends(outh2_bearer)]):
 
 
 @router.post('/token', response_model=Token)
-def login_for_access_token(db: db_dependency, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+@limiter.limit("5/minute")
+def login_for_access_token(request: Request, db: db_dependency, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     """Authenticate with username/password and return a bearer token."""
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
@@ -159,7 +189,8 @@ class LoginRequest(BaseModel):
     password: str
 
 @router.post("/login")
-def login_user(login_request: LoginRequest, db: db_dependency):
+@limiter.limit("5/minute")
+def login_user(request: Request, login_request: LoginRequest, db: db_dependency):
     """Authenticate by email and password and return a JWT plus user details."""
     user = db.query(Users).filter(Users.email == login_request.email).first()
     if not user:
