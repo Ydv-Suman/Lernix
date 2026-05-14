@@ -8,6 +8,7 @@ import Summarize from './components/course/chapters/Summarize';
 import AskQuestions from './components/course/chapters/ask-questions';
 import CreateMcq from './components/course/chapters/create-mcq';
 import Insights from './components/insights/insights';
+import Recommendations from './components/insights/Recommendations';
 import About from './components/About';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -64,6 +65,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Insights />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/recommendations"
+            element={
+              <ProtectedRoute>
+                <Recommendations />
               </ProtectedRoute>
             }
           />

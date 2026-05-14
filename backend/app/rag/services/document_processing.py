@@ -10,9 +10,12 @@ from langchain_classic.chains.combine_documents import create_stuff_documents_ch
 from langchain_classic.chains.retrieval import create_retrieval_chain
 from typing import List
 import os
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if openai_api_key is None:
@@ -41,13 +44,18 @@ def convert_to_document(chunks: List[str]) -> List[Document]:
 
 # 3. Create Hybrid Retriever
 def create_retriever(docs: List[Document]):
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-
-    dense_vectorstore = FAISS.from_documents(docs, embeddings)
-    dense_retriever = dense_vectorstore.as_retriever(search_kwargs={"k": 6})
-
     sparse_retriever = BM25Retriever.from_documents(docs)
     sparse_retriever.k = 4
+
+    try:
+        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        dense_vectorstore = FAISS.from_documents(docs, embeddings)
+        dense_retriever = dense_vectorstore.as_retriever(search_kwargs={"k": 6})
+    except Exception as exc:
+        # Fall back to sparse retrieval so RAG endpoints still work if the
+        # local transformer/torch stack is missing or broken.
+        logger.warning("Dense retriever unavailable, using BM25 only: %s", exc)
+        return sparse_retriever
 
     return EnsembleRetriever(
         retrievers=[dense_retriever, sparse_retriever],

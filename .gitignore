@@ -39,3 +39,7 @@ htmlcov/
 *.pdf
 *.docx
 *.txt
+generated/
+.matplotlib/
+scripts/
+files/

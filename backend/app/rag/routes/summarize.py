@@ -10,8 +10,10 @@ from app.rag.services.summarizer_logic import summarize_text
 from app.models import Chapters, Users, Courses, ChapterFiles, LearningSessions
 from app.routes.auth import db_dependency
 from app.routes.users import user_dependency
+import logging
 
 limiter = Limiter(key_func=get_remote_address)
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(
@@ -104,7 +106,8 @@ def summarize_uploaded_file(
         raise
     except Exception as e:
         db.rollback()
+        logger.exception("Summarize failed for file_id=%s", file_id)
         raise HTTPException(
             status_code=500,
-            detail="Failed to summarize document"
+            detail=f"Failed to summarize document: {str(e)}"
         )

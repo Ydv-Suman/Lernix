@@ -144,13 +144,13 @@ export const chapterFilesAPI = {
     );
     return response.data;
   },
-  submitMCQ: async (courseId, chapterId, fileId, answers, timeSpent, fullQuestions = null) => {
+  submitMCQ: async (courseId, chapterId, fileId, answers, timeSpent, sessionKey = '') => {
     const response = await api.post(
       `/courses/${courseId}/chapter/${chapterId}/files/${fileId}/createMCQ/submit`,
       {
         answers: answers,
         time_spent_seconds: timeSpent,
-        full_questions: fullQuestions
+        session_key: sessionKey
       }
     );
     return response.data;

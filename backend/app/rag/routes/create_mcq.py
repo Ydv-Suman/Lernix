@@ -11,8 +11,10 @@ from app.models import Chapters, LearningSessions, Users, Courses, ChapterFiles,
 from app.routes.auth import db_dependency
 from app.routes.users import user_dependency
 import hashlib, json
+import logging
 
 limiter = Limiter(key_func=get_remote_address)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix='/courses/{course_id}/chapter/{chapter_id}/files/{file_id}/createMCQ',
@@ -97,9 +99,10 @@ def create_mcq(request: Request, db:db_dependency, user:user_dependency, course_
     except HTTPException:
         raise
     except Exception as e:
+        logger.exception("MCQ generation failed for file_id=%s", file_id)
         raise HTTPException(
             status_code=500,
-            detail="Failed to generate MCQs"
+            detail=f"Failed to generate MCQs: {str(e)}"
         )
 
 @router.post('/submit', status_code=status.HTTP_200_OK)
@@ -247,7 +250,8 @@ def submit_mcq(
         raise
     except Exception as e:
         db.rollback()
+        logger.exception("MCQ submit failed for file_id=%s", file_id)
         raise HTTPException(
             status_code=500,
-            detail="Failed to submit MCQs"
+            detail=f"Failed to submit MCQs: {str(e)}"
         )

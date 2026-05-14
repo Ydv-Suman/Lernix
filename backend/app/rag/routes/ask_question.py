@@ -10,8 +10,10 @@ from app.rag.services.ask_question_logic import ask_question
 from app.models import LearningSessions, Users, Courses, Chapters , ChapterFiles
 from app.routes.auth import db_dependency
 from app.routes.users import user_dependency
+import logging
 
 limiter = Limiter(key_func=get_remote_address)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/courses/{course_id}/chapter/{chapter_id}/files/{file_id}/ask_question",
@@ -102,7 +104,8 @@ def ask_questions(
         raise
     except Exception as e:
         db.rollback()
+        logger.exception("Ask question failed for file_id=%s", file_id)
         raise HTTPException(
             status_code=500,
-            detail="Failed to process question"
+            detail=f"Failed to process question: {str(e)}"
         )

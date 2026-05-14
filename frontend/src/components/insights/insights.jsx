@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import NavBar from '../NavBar';
 import { coursesAPI, insightsAPI, chaptersAPI } from '../../services/api';
 import {
@@ -16,7 +15,6 @@ import {
 } from 'recharts';
 
 const Insights = () => {
-  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -32,7 +30,6 @@ const Insights = () => {
   const [totalTimeData, setTotalTimeData] = useState([]);
   const [mcqAttempts, setMcqAttempts] = useState([]);
   const [mcqAccuracyData, setMcqAccuracyData] = useState([]);
-  const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     fetchCourses();
@@ -122,15 +119,6 @@ const Insights = () => {
       }));
 
       setMcqAccuracyData(accuracyData);
-
-      // Fetch ML recommendations
-      try {
-        const recommendationsData = await insightsAPI.getRecommendations(courseId);
-        setRecommendations(recommendationsData.recommendations || []);
-      } catch (recErr) {
-        console.error('Failed to load recommendations:', recErr);
-        setRecommendations([]);
-      }
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to load insights data');
     }
@@ -353,48 +341,6 @@ const Insights = () => {
                 </div>
               </div>
 
-              {/* Recommendations Panel */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-                <h3 className="text-3xl font-bold text-gray-900 mb-4">Recommendations</h3>
-                {recommendations && recommendations.length > 0 ? (
-                  <div className="space-y-3">
-                    {recommendations.map((rec, index) => {
-                      // Determine color based on predicted state
-                      let bgColor = 'bg-blue-50';
-                      let borderColor = 'border-blue-400';
-                      
-                      if (rec.predicted_state === 'revise_urgent') {
-                        bgColor = 'bg-red-50';
-                        borderColor = 'border-red-400';
-                      } else if (rec.predicted_state === 'practice_more') {
-                        bgColor = 'bg-yellow-50';
-                        borderColor = 'border-yellow-400';
-                      } else if (rec.predicted_state === 'on_track') {
-                        bgColor = 'bg-blue-50';
-                        borderColor = 'border-blue-400';
-                      } else if (rec.predicted_state === 'mastered') {
-                        bgColor = 'bg-green-50';
-                        borderColor = 'border-green-400';
-                      }
-                      
-                      return (
-                        <div
-                          key={rec.chapter_id || index}
-                          className={`p-4 rounded-md border-l-4 ${bgColor} ${borderColor}`}
-                        >
-                          <p className="text-sm text-gray-800 font-medium mb-1">
-                            {rec.chapter_name}
-                          </p>
-                          <p className="text-sm text-gray-700">{rec.recommendation}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm">No recommendations available at this time.</p>
-                )}
-              </div>
-
               {/* MCQ Section */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <h3 className="text-3xl font-bold text-gray-900 mb-4">MCQ Attempts</h3>
@@ -446,4 +392,3 @@ const Insights = () => {
 };
 
 export default Insights;
-

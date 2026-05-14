@@ -12,7 +12,7 @@ const CreateMcq = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [questions, setQuestions] = useState([]);
-  const [fullQuestions, setFullQuestions] = useState([]);
+  const [sessionKey, setSessionKey] = useState('');
   const [userAnswers, setUserAnswers] = useState({});
   const [results, setResults] = useState(null);
   const [startTime, setStartTime] = useState(null);
@@ -41,14 +41,14 @@ const CreateMcq = () => {
             selectedFileId,
             {}, // Empty answers since not submitted
             durationSeconds,
-            fullQuestions
+            sessionKey
           ).catch(err => {
             console.error('Failed to record MCQ duration on cleanup:', err);
           });
         }
       }
     };
-  }, [startTime, questions, results, courseId, chapterId, selectedFileId, fullQuestions]);
+  }, [startTime, questions, results, courseId, chapterId, selectedFileId, sessionKey]);
 
   const fetchFiles = async () => {
     setLoading(true);
@@ -75,6 +75,7 @@ const CreateMcq = () => {
     setSubmitting(true);
     setError('');
     setQuestions([]);
+    setSessionKey('');
     setUserAnswers({});
     setResults(null);
     const activityStartTime = Date.now();
@@ -90,10 +91,7 @@ const CreateMcq = () => {
       
       if (response.questions && Array.isArray(response.questions)) {
         setQuestions(response.questions);
-        // Store full questions for submission
-        if (response.full_questions && Array.isArray(response.full_questions)) {
-          setFullQuestions(response.full_questions);
-        }
+        setSessionKey(response.session_key || '');
         // Initialize user answers
         const initialAnswers = {};
         response.questions.forEach(q => {
@@ -136,7 +134,7 @@ const CreateMcq = () => {
         selectedFileId,
         userAnswers,
         timeSpent,
-        fullQuestions
+        sessionKey
       );
       
       setResults(response);
@@ -149,7 +147,7 @@ const CreateMcq = () => {
 
   const handleReset = () => {
     setQuestions([]);
-    setFullQuestions([]);
+    setSessionKey('');
     setUserAnswers({});
     setResults(null);
     setStartTime(null);
@@ -201,7 +199,7 @@ const CreateMcq = () => {
                       selectedFileId,
                       {}, // Empty answers since not submitted
                       durationSeconds,
-                      fullQuestions
+                      sessionKey
                     );
                   } catch (err) {
                     console.error('Failed to record MCQ duration:', err);

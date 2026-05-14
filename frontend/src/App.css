@@ -1,1 +1,71 @@
 @import "tailwindcss";
+
+:root {
+  color: #0f172a;
+  background-color: #f7f4ed;
+  --font-display: "SF Pro Display", "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-text: "SF Pro Text", "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-text);
+}
+
+html {
+  background-color: #f7f4ed;
+}
+
+body {
+  min-width: 320px;
+  background:
+    radial-gradient(circle at top, rgba(31, 92, 91, 0.08), transparent 30%),
+    linear-gradient(180deg, #f7f4ed 0%, #f3f6f2 100%);
+  color: #0f172a;
+  font-family: var(--font-text);
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.022em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+p,
+li,
+label,
+input,
+textarea,
+select,
+button,
+th,
+td,
+a,
+span {
+  font-family: var(--font-text);
+}
+
+button,
+input,
+textarea,
+select {
+  letter-spacing: -0.014em;
+}
+
+small {
+  font-family: var(--font-text);
+  letter-spacing: -0.01em;
+}
